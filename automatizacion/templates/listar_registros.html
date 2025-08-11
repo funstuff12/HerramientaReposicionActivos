@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% load humanize static %}
+
+{% block title %}Listado de Registros{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #0d6efd; 
+        --secondary-color: #6c757d; 
+        --success-color: #198754; 
+        --warning-color: #ffc107;
+        --danger-color: #dc3545; 
+        --info-color: #0dcaf0; 
+        --light-gray: #f8f9fa;
+        --dark-gray: #6c757d; 
+        --text-color: #212529; 
+        --border-color: #dee2e6;
+        --vencido-bg: #fbebeb;
+    }
+    
+    .page-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 2rem; 
+    }
+    
+    .page-header h1 { 
+        font-size: 2.2rem; 
+        margin: 0;
+    }
+    
+    .header-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    /* Botones estandarizados */
+    .btn {
+        text-decoration: none; 
+        padding: 0.75rem 1.5rem; 
+        border-radius: 5px; 
+        font-weight: 500; 
+        border: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .btn-primary { 
+        background-color: var(--primary-color); 
+        color: white; 
+    }
+    
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        color: white;
+    }
+    
+    .btn-secondary { 
+        background-color: var(--secondary-color); 
+        color: white; 
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5c636a;
+        color: white;
+    }
+    
+    .btn-warning {
+        background-color: var(--warning-color);
+        color: var(--text-color);
+    }
+    
+    .btn-warning:hover {
+        background-color: #ffca2c;
+        color: var(--text-color);
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Estilo especial para el ID clickeable */
+    .id-link {
+        color: #0d6efd !important;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 0.5rem 0.75rem;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+        display: inline-block;
+        background-color: rgba(13, 110, 253, 0.1);
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    .id-link:hover {
+        background-color: #0d6efd;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+    }
+    
+    .search-container { 
+        width: 100%; 
+        margin-bottom: 2rem; 
+        padding: 1.5rem; 
+        background-color: var(--light-gray); 
+        border-radius: 8px; 
+    }
+    
+    .search-form { 
+        display: flex; 
+        gap: 1rem; 
+        align-items: center;
+    }
+    
+    .search-form input[type="text"] { 
+        flex-grow: 1; 
+        padding: 0.75rem; 
+        border: 1px solid var(--border-color); 
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    .search-form input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .content-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        background-color: #fff; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        border-radius: 8px; 
+        overflow: hidden; 
+    }
+    
+    .content-table thead tr { 
+        background-color: #e9ecef; 
+        text-align: left; 
+    }
+    
+    .content-table th, 
+    .content-table td { 
+        padding: 1rem; 
+        vertical-align: middle; 
+    }
+    
+    .content-table th:last-child,
+    .content-table td:last-child {
+        width: 200px; /* Reducir ancho ya que quitamos un botón */
+    }
+    
+    .content-table tbody tr { 
+        border-bottom: 1px solid var(--border-color); 
+    }
+    
+    .content-table tbody tr:hover { 
+        background-color: #f1f3f5; 
+    }
+    
+    tr.vencido { 
+        background-color: var(--vencido-bg) !important; 
+        font-weight: 500; 
+    }
+    
+    tr.vencido td:first-child { 
+        border-left: 4px solid var(--danger-color); 
+    }
+    
+    .status-badge { 
+        color: white; 
+        padding: 0.3rem 0.6rem; 
+        border-radius: 12px; 
+        font-size: 0.8rem; 
+        font-weight: 600; 
+        text-transform: uppercase; 
+        display: inline-block;
+    }
+    
+    .status-pendiente { 
+        background-color: var(--warning-color); 
+        color: var(--text-color); 
+    }
+    
+    .status-pagado_parcial { 
+        background-color: var(--info-color); 
+        color: var(--text-color); 
+    }
+    
+    .status-pagado_total { 
+        background-color: var(--success-color); 
+    }
+    
+    .days-indicator { 
+        font-weight: 500; 
+    }
+    
+    .days-danger { 
+        color: var(--danger-color); 
+    }
+    
+    .days-warning { 
+        color: var(--warning-color); 
+    }
+    
+    .days-ok { 
+        color: var(--success-color); 
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        min-width: auto;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .action-buttons .btn:hover {
+        text-decoration: none;
+    }
+    
+    /* Botón Flujo de Caja - Estilo similar al de editar pero azul */
+    .btn-flujo { 
+        background-color: var(--primary-color); 
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-flujo:hover {
+        background-color: #0b5ed7;
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Botón Eliminar */
+    .btn-eliminar { 
+        background-color: var(--danger-color); 
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-eliminar:hover {
+        background-color: #bb2d3b;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<div class="page-header">
+    <h1>Listado de Registros</h1>
+    <div class="header-buttons">
+        <a href="{% url 'registros_crear' %}" class="btn btn-primary">Crear Registro</a>
+        <a href="{% url 'cargar_excel_completo' %}" class="btn btn-secondary">Importar Registro</a>
+    </div>
+</div>
+
+<div class="search-container">
+    <form method="get" action="{% url 'registros_list' %}" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por ID de Registro, Cliente..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-secondary">Buscar</button>
+    </form>
+</div>
+<!-- Modal de Confirmación de Eliminación -->
+<div id="eliminarModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:2rem; border-radius:8px; max-width:400px; width:100%;">
+        <h3>Confirmar eliminación</h3>
+        <p id="modalTexto">¿Estás seguro de que deseas eliminar este registro?</p>
+        <form id="formEliminar" method="post">
+            {% csrf_token %}
+            <div style="display:flex; justify-content:end; gap:1rem; margin-top:1rem;">
+                <button type="button" onclick="cerrarModal()" class="btn btn-secondary btn-sm">Cancelar</button>
+                <button type="submit" class="btn btn-eliminar btn-sm">Eliminar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="content-table">
+    <thead>
+        <tr>
+            <th>ID Registro</th>
+            <th>Cliente</th>
+            <th>Valor a Cobrar</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for registro in registros %}
+        <tr class="registro-row"
+            data-valor-cobrar="{{ registro.valor_cobrar_cliente }}"
+            data-fecha-limite="{{ registro.fecha_limite_cobro|date:'Y-m-d' }}"
+            data-estado-cobro="{{ registro.estado_cobro }}">
+            
+            {{ registro.pagos_cliente_data|json_script:registro.id }}
+
+            <td>
+                <a href="{% url 'registros_editar' registro.id %}" class="id-link">
+                    {{ registro.id }}
+                </a>
+            </td>
+            <td>{{ registro.cliente.nombre }}</td>
+            <td>${{ registro.valor_cobrar_cliente|floatformat:2|intcomma }}</td>
+            <td><span class="status-badge status-{{ registro.estado_cobro }}">{{ registro.get_estado_cobro_display }}</span></td>
+
+            <td class="action-buttons">
+                <a href="{% url 'flujo_caja' registro.id %}" class="btn btn-flujo btn-sm">
+                    <i class="fas fa-chart-line"></i> Flujo de Caja
+                </a>
+                <a href="#" class="btn btn-eliminar btn-sm" 
+                onclick="abrirModal('{{ registro.id }}', '{{ registro.cliente.nombre }}')">
+                    <i class="fas fa-trash"></i> Eliminar
+                </a>
+
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">No hay registros.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Función para formatear dinero en formato colombiano
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        };
+
+        // Obtenemos todas las filas que necesitan ser procesadas
+        const rows = document.querySelectorAll('.registro-row');
+
+        rows.forEach(row => {
+            // --- 1. LEER DATOS DEL HTML ---
+            const valorACobrar = parseFloat(row.dataset.valorCobrar);
+            const fechaLimiteStr = row.dataset.fechaLimite;
+            const estadoCobro = row.dataset.estadoCobro;
+            
+            // Leer el JSON de pagos desde la etiqueta <script>
+            const pagosDataElement = document.getElementById(row.querySelector('strong').textContent);
+            const pagos = JSON.parse(pagosDataElement.textContent);
+
+            // --- 2. CALCULAR VALOR PENDIENTE ---
+            let totalPagado = 0;
+            if (Array.isArray(pagos)) {
+                totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
+            }
+            const valorPendiente = valorACobrar - totalPagado;
+
+            // --- 3. CALCULAR DÍAS DE VENCIMIENTO ---
+
+           
+            // --- 4. ACTUALIZAR LA CELDA DE VALOR PENDIENTE ---
+            const cellPendiente = row.querySelector('.cell-valor-pendiente');
+            if (cellPendiente) {
+                cellPendiente.textContent = formatCurrency(valorPendiente);
+            }
+        });
+    window.abrirModal = function(id, cliente) {
+            const modal = document.getElementById('eliminarModal');
+            const form = document.getElementById('formEliminar');
+            const texto = document.getElementById('modalTexto');
+
+            form.action = `/registros/${id}/eliminar/`;
+            texto.textContent = `¿Estás seguro de que deseas eliminar el registro de ${cliente}?`;
+            modal.style.display = 'flex';
+        }
+
+        window.cerrarModal = function() {
+            const modal = document.getElementById('eliminarModal');
+            modal.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}  

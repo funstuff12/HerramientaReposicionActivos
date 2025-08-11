@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Cuentas por Cobrar{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas por Cobrar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #28a745; --secondary-color: #6c757d; --danger-color: #dc3545; --warning-color: #ffc107; --info-color: #17a2b8; --gray-50: #f8f9fa; --gray-100: #f1f5f9; --gray-200: #e9ecef; --gray-500: #6c757d; --gray-700: #495057; --white: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--gray-50); }
+        .container { max-width: 1600px; margin: 0 auto; padding: 2rem; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--primary-color); }
+        .page-header h1 { font-size: 2.2rem; color: var(--gray-700); }
+        .header-buttons { display: flex; gap: 1rem; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; cursor: pointer; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--secondary-color); color: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card.total { border-color: var(--primary-color); }
+        .stat-card.pending { border-color: var(--danger-color); }
+        .stat-card.collected { border-color: var(--info-color); }
+        .stat-card.overdue { border-color: var(--warning-color); }
+        .stat-title { font-size: 0.9rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--gray-700); }
+        .filters { background: var(--white); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-label { font-weight: 600; color: var(--gray-700); }
+        .form-input, .form-select { width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary-color); }
+        .table-container { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: var(--gray-50); padding: 1rem; text-align: left; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--gray-500); border-bottom: 2px solid var(--gray-200); }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+        .data-table tbody tr:hover { background-color: #fcfcfc; }
+        .data-table tbody tr.overdue { background-color: #fff8f8; border-left: 3px solid var(--danger-color); }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .status-paid { background: #e9f9ee; color: #28a745; }
+        .status-partial { background: #e3f2fd; color: #17a2b8; }
+        .status-pending { background: #fff8e1; color: #ffc107; }
+        .amount-positive { color: var(--primary-color); font-weight: 600; }
+        .amount-negative { color: var(--danger-color); font-weight: 600; }
+        .amount-neutral { color: var(--gray-700); }
+        .empty-state, .loading-state { text-align: center; padding: 4rem; color: var(--gray-500); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-hand-holding-usd"></i> Cuentas por Cobrar</h1>
+            <div class="header-buttons">
+                <a href="{% url 'registros_crear' %}" class="btn btn-primary">Crear Registro</a>
+                <a href="{% url 'index' %}" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card total"><div class="stat-title">Total Facturado</div><div class="stat-value" id="totalFacturado">$0</div></div>
+            <div class="stat-card pending"><div class="stat-title">Saldo Pendiente</div><div class="stat-value" id="saldoPendiente">$0</div></div>
+            <div class="stat-card collected"><div class="stat-title">Total Cobrado</div><div class="stat-value" id="totalCobrado">$0</div></div>
+            <div class="stat-card overdue"><div class="stat-title">Total Vencido</div><div class="stat-value" id="totalVencido">$0</div></div>
+        </div>
+
+        <div class="filters">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label class="form-label" for="clienteFilter">Filtrar por Cliente</label>
+                    <select class="form-select" id="clienteFilter"><option value="">Todos los clientes</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="estadoFilter">Filtrar por Estado</label>
+                    <select class="form-select" id="estadoFilter">
+                        <option value="">Todos los estados</option>
+                        <option value="vencido">Vencido</option>
+                        <option value="aldia">Al día</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Cliente</th>
+                        <th>Documento</th>
+                        <th>Fecha Entrega (Día 0)</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Días Venc.</th>
+                        <th>Valor Original</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Pagos Anticipados</th>
+                        <th>(0-30d)</th>
+                        <th>(31-60d)</th>
+                        <th>(61-90d)</th>
+                        <th>(91-120d)</th>
+                        <th>(+120d)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="13" class="loading-state">Cargando datos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let allData = [];
+        let filteredData = [];
+
+        const formatCurrency = (amount) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
+        const formatDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('es-CO', {timeZone: 'UTC'}) : 'N/A';
+        const getStatusBadge = (estado) => {
+            if (estado.toLowerCase().includes('parcial')) return `<span class="status-badge status-partial">${estado}</span>`;
+            if (estado.toLowerCase().includes('pagado')) return `<span class="status-badge status-paid">${estado}</span>`;
+            return `<span class="status-badge status-pending">${estado}</span>`;
+        };
+
+        const updateStats = (summary) => {
+            document.getElementById('totalFacturado').textContent = formatCurrency(summary.total_facturado || 0);
+            document.getElementById('saldoPendiente').textContent = formatCurrency(summary.total_saldo_pendiente || 0);
+            document.getElementById('totalCobrado').textContent = formatCurrency(summary.total_cobrado || 0);
+            
+            const totalVencido = filteredData.reduce((sum, item) => item.esta_vencido ? sum + item.saldo_pendiente : sum, 0);
+            document.getElementById('totalVencido').textContent = formatCurrency(totalVencido);
+        };
+
+        const renderTable = (data) => {
+            const tbody = document.getElementById('tableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="empty-state">No hay registros que coincidan con los filtros.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(item => `
+                <tr class="${item.esta_vencido ? 'overdue' : ''}">
+                    <td>${getStatusBadge(item.estado_cobro)}</td>
+                    <td><strong>${item.cliente_nombre}</strong></td>
+                    <td>${item.registro_id}</td>
+                    
+                    <td>${formatDate(item.fecha_entrega)}</td>
+                    <td>${formatDate(item.fecha_vencimiento)}</td>
+                    <td>${item.esta_vencido ? `<span class="amount-negative">${item.dias_vencidos}</span>` : '0'}</td>
+                    <td class="amount-neutral">${formatCurrency(item.valor_original)}</td>
+                    <td class="amount-negative">${formatCurrency(item.saldo_pendiente)}</td>
+                    <td>"Pago Anticipado"</td>
+                    <td class="amount-positive">${formatCurrency(item.cobros_0_30)}</td>
+                    <td class="amount-positive">${formatCurrency(item.cobros_31_60)}</td>
+                    <td class="amount-positive">${formatCurrency(item.cobros_61_90)}</td>
+                    <td class="amount-positive">${formatCurrency(item.cobros_91_120)}</td>
+                    <td class="amount-positive">${formatCurrency(item.cobros_120_plus)}</td>
+                </tr>
+            `).join('');
+        };
+
+        const populateFilters = (data) => {
+            const clienteFilter = document.getElementById('clienteFilter');
+            const clientes = [...new Set(data.map(item => item.cliente_nombre))].sort();
+            clienteFilter.innerHTML = '<option value="">Todos los clientes</option>' + clientes.map(c => `<option value="${c}">${c}</option>`).join('');
+        };
+
+        const applyFilters = () => {
+            const cliente = document.getElementById('clienteFilter').value;
+            const estado = document.getElementById('estadoFilter').value;
+
+            filteredData = allData.filter(item => {
+                if (cliente && item.cliente_nombre !== cliente) return false;
+                if (estado === 'vencido' && !item.esta_vencido) return false;
+                if (estado === 'aldia' && item.esta_vencido) return false;
+                return true;
+            });
+            renderTable(filteredData);
+            updateStats(window.apiSummary);
+        };
+
+        const loadData = async () => {
+            try {
+                const response = await fetch("{% url 'api_cuentas_por_cobrar' %}");
+                if (!response.ok) throw new Error('Error al conectar con la API');
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+
+                allData = data.cxc_data;
+                window.apiSummary = data.resumen;
+
+                populateFilters(allData);
+                applyFilters();
+            } catch (error) {
+                console.error("Error cargando datos de CxC:", error);
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="13" class="empty-state">❌ Error al cargar los datos.</td></tr>`;
+            }
+        };
+
+        loadData();
+
+        document.getElementById('clienteFilter').addEventListener('change', applyFilters);
+        document.getElementById('estadoFilter').addEventListener('change', applyFilters);
+    });
+    </script>
+</body>
+{% endblock %}

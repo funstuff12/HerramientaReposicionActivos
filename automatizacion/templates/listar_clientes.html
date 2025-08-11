@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Clientes{% endblock %}
+
+{% block content %}
+
+<style>
+
+    @media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .search-form {
+        flex-direction: column;
+    }
+    .search-form input[type="text"] {
+        width: 100%;
+    }
+    .search-form button {
+        width: 100%;
+    }
+    /* Estilos para la tabla */
+    .content-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .content-table thead, .content-table tbody, .content-table th, .content-table td, .content-table tr {
+        display: block;
+    }
+    .content-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .content-table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .content-table td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+    .content-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-left: 1rem;
+        font-weight: bold;
+        text-align: left;
+    }
+    /* Etiquetas para cada celda de la tabla */
+    td:nth-of-type(1):before { content: "ID Cliente"; }
+    td:nth-of-type(2):before { content: "Nombre"; }
+    td:nth-of-type(3):before { content: "Contacto"; }
+    td:nth-of-type(4):before { content: "Términos"; }
+    td:nth-of-type(5):before { content: "Días Promedio"; }
+    td:nth-of-type(6):before { content: "Acciones"; }
+}
+    /* Estilos generales */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #343a40;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+
+    /* Estilos para la barra de búsqueda */
+    .search-container {
+        width: 100%;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .search-form {
+        display: flex;
+        gap: 1rem;
+    }
+    .search-form input[type="text"] {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    .search-form button {
+        background-color: #6c757d;
+        cursor: pointer;
+    }
+    .search-form button:hover {
+        background-color: #5a6268;
+    }
+    
+    /* Estilo especial para el ID clickeable */
+    .id-link {
+        color: #0d6efd !important;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 0.5rem 0.75rem;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+        display: inline-block;
+        background-color: rgba(13, 110, 253, 0.1);
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    .id-link:hover {
+        background-color: #0d6efd;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+    }
+    
+    /* Estilos para los botones de acción en la tabla */
+    .action-buttons button {
+        color: white !important;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: transform 0.2s;
+        display: inline-block;
+        margin-right: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+    .action-buttons button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-delete { background-color: #dc3545; }
+
+    /* Estilos de la tabla */
+    .content-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .content-table thead tr {
+        background-color: #e9ecef;
+        color: #495057;
+        text-align: left;
+    }
+    .content-table th, .content-table td {
+        padding: 1rem;
+    }
+    .content-table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+    .content-table tbody tr:last-of-type {
+        border-bottom: none;
+    }
+    
+    /* Estilos adicionales */
+    .contact-info { font-size: 0.9rem; color: #6c757d; }
+    .days-info { font-weight: 500; color: #495057; }
+    .terms-badge {
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+</style>
+
+<div class="page-header">
+    <h1>Listado de Clientes</h1>
+    <a href="{% url 'clientes_crear' %}" class="btn-primary">Crear Cliente</a>
+</div>
+
+<div class="search-container">
+    <form method="get" action="{% url 'clientes_list' %}" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por ID, Nombre o Contacto..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn-primary">Buscar</button>
+    </form>
+</div>
+
+<table class="content-table">
+    <thead>
+        <tr>
+            <th>ID Cliente</th>
+            <th>Nombre</th>
+            <th>Contacto</th>
+            <th>Términos Contractuales</th>
+            <th>Días Promedio Pago</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}
+        <tr>
+            <td>
+                <a href="{% url 'clientes_editar' cliente.id %}" class="id-link">
+                    {{ cliente.id }}
+                </a>
+            </td>
+            <td>{{ cliente.nombre }}</td>
+            <td>
+                <div>{{ cliente.contacto }}</div>
+                {% if cliente.email %}<div class="contact-info">{{ cliente.email }}</div>{% endif %}
+                {% if cliente.telefono %}<div class="contact-info">{{ cliente.telefono }}</div>{% endif %}
+            </td>
+            <td><span class="terms-badge">{{ cliente.terminos_contractuales }} días</span></td>
+            <td><span class="days-info">{{ cliente.average_days_to_pay }} días</span></td>
+            <td class="action-buttons">
+                <!-- Eliminar con confirmación directa -->
+                <form method="post" action="{% url 'clientes_eliminar' cliente.id %}" style="display: inline;" 
+                      onsubmit="return confirm('¿Estás seguro de eliminar al cliente {{ cliente.nombre }}? Esta acción no se puede deshacer.')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-delete">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem;">
+                {% if request.GET.q %}
+                    No se encontraron clientes con los criterios de búsqueda "{{ request.GET.q }}".
+                {% else %}
+                    No hay clientes registrados.
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if clientes %}
+<div style="margin-top: 1rem; color: #6c757d; font-size: 0.9rem;">
+    Total de clientes activos: {{ clientes.count }}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,622 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Registros{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Datos desde Excel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background: #e3f2fd;
+        }
+        
+        .upload-area.dragover {
+            border-color: #0d6efd;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        
+        .file-info {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .preview-table {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .column-mapping {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .section-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #6c757d;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .btn-process {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-file-excel text-success me-2"></i>
+                    Importar Datos desde Excel
+                </h2>
+                
+                <!-- Pestañas de navegación -->
+                <ul class="nav nav-tabs" id="importTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="maquinaria-tab" data-bs-toggle="tab" data-bs-target="#maquinaria" type="button" role="tab">
+                            <i class="fas fa-cogs me-2"></i>Maquinaria
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cliente-tab" data-bs-toggle="tab" data-bs-target="#cliente" type="button" role="tab">
+                            <i class="fas fa-user-tie me-2"></i>Cliente
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="proveedor-tab" data-bs-toggle="tab" data-bs-target="#proveedor" type="button" role="tab">
+                            <i class="fas fa-truck me-2"></i>Proveedor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab">
+                            <i class="fas fa-clipboard-list me-2"></i>Registro
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Contenido de las pestañas -->
+                <div class="tab-content" id="importTabsContent">
+                    
+                    <!-- Pestaña Maquinaria -->
+                    <div class="tab-pane fade show active" id="maquinaria" role="tabpanel">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-cogs section-icon"></i>
+                                    <h4>Importar Maquinaria</h4>
+                                    <p class="text-muted">Sube un archivo Excel con información de maquinaria</p>
+                                </div>
+                                
+                                <form id="form-maquinaria" method="post" enctype="multipart/form-data">
+                                    <div class="upload-area" id="upload-maquinaria">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5>Arrastra tu archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos permitidos: .xlsx, .xls</p>
+                                        <input type="file" name="archivo_excel" accept=".xlsx,.xls" class="d-none" id="file-maquinaria" required>
+                                        <input type="hidden" name="tipo_importacion" value="maquinaria">
+                                    </div>
+                                    
+                                    <div class="file-info" id="info-maquinaria">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-excel text-success me-3"></i>
+                                            <div>
+                                                <strong id="filename-maquinaria"></strong>
+                                                <div class="text-muted small" id="filesize-maquinaria"></div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeFile('maquinaria')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-section" id="preview-maquinaria" style="display: none;">
+                                        <h6 class="mt-4">Vista previa de datos:</h6>
+                                        <div class="preview-table" id="table-maquinaria"></div>
+                                        
+                                        <div class="column-mapping">
+                                            <h6><i class="fas fa-exchange-alt me-2"></i>Mapeo de Columnas</h6>
+                                            <p class="text-muted small">Relaciona las columnas del Excel con los campos de la base de datos</p>
+                                            <div id="mapping-maquinaria" class="row"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-process text-white">
+                                            <i class="fas fa-upload me-2"></i>Procesar Importación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña Cliente -->
+                    <div class="tab-pane fade" id="cliente" role="tabpanel">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-user-tie section-icon"></i>
+                                    <h4>Importar Clientes</h4>
+                                    <p class="text-muted">Sube un archivo Excel con información de clientes</p>
+                                </div>
+                                
+                                <form id="form-cliente" method="post" enctype="multipart/form-data">
+                                    <div class="upload-area" id="upload-cliente">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5>Arrastra tu archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos permitidos: .xlsx, .xls</p>
+                                        <input type="file" name="archivo_excel" accept=".xlsx,.xls" class="d-none" id="file-cliente" required>
+                                        <input type="hidden" name="tipo_importacion" value="cliente">
+                                    </div>
+                                    
+                                    <div class="file-info" id="info-cliente">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-excel text-success me-3"></i>
+                                            <div>
+                                                <strong id="filename-cliente"></strong>
+                                                <div class="text-muted small" id="filesize-cliente"></div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeFile('cliente')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-section" id="preview-cliente" style="display: none;">
+                                        <h6 class="mt-4">Vista previa de datos:</h6>
+                                        <div class="preview-table" id="table-cliente"></div>
+                                        
+                                        <div class="column-mapping">
+                                            <h6><i class="fas fa-exchange-alt me-2"></i>Mapeo de Columnas</h6>
+                                            <p class="text-muted small">Relaciona las columnas del Excel con los campos de la base de datos</p>
+                                            <div id="mapping-cliente" class="row"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-process text-white">
+                                            <i class="fas fa-upload me-2"></i>Procesar Importación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña Proveedor -->
+                    <div class="tab-pane fade" id="proveedor" role="tabpanel">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-truck section-icon"></i>
+                                    <h4>Importar Proveedores</h4>
+                                    <p class="text-muted">Sube un archivo Excel con información de proveedores</p>
+                                </div>
+                                
+                                <form id="form-proveedor" method="post" enctype="multipart/form-data">
+                                    <div class="upload-area" id="upload-proveedor">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5>Arrastra tu archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos permitidos: .xlsx, .xls</p>
+                                        <input type="file" name="archivo_excel" accept=".xlsx,.xls" class="d-none" id="file-proveedor" required>
+                                        <input type="hidden" name="tipo_importacion" value="proveedor">
+                                    </div>
+                                    
+                                    <div class="file-info" id="info-proveedor">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-excel text-success me-3"></i>
+                                            <div>
+                                                <strong id="filename-proveedor"></strong>
+                                                <div class="text-muted small" id="filesize-proveedor"></div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeFile('proveedor')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-section" id="preview-proveedor" style="display: none;">
+                                        <h6 class="mt-4">Vista previa de datos:</h6>
+                                        <div class="preview-table" id="table-proveedor"></div>
+                                        
+                                        <div class="column-mapping">
+                                            <h6><i class="fas fa-exchange-alt me-2"></i>Mapeo de Columnas</h6>
+                                            <p class="text-muted small">Relaciona las columnas del Excel con los campos de la base de datos</p>
+                                            <div id="mapping-proveedor" class="row"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-process text-white">
+                                            <i class="fas fa-upload me-2"></i>Procesar Importación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña Registro -->
+                    <div class="tab-pane fade" id="registro" role="tabpanel">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-clipboard-list section-icon"></i>
+                                    <h4>Importar Registros</h4>
+                                    <p class="text-muted">Sube un archivo Excel con registros completos</p>
+                                </div>
+                                
+                                <form id="form-registro" method="post" enctype="multipart/form-data">
+                                    <div class="upload-area" id="upload-registro">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5>Arrastra tu archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos permitidos: .xlsx, .xls</p>
+                                        <input type="file" name="archivo_excel" accept=".xlsx,.xls" class="d-none" id="file-registro" required>
+                                        <input type="hidden" name="tipo_importacion" value="registro">
+                                    </div>
+                                    
+                                    <div class="file-info" id="info-registro">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-excel text-success me-3"></i>
+                                            <div>
+                                                <strong id="filename-registro"></strong>
+                                                <div class="text-muted small" id="filesize-registro"></div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeFile('registro')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-section" id="preview-registro" style="display: none;">
+                                        <h6 class="mt-4">Vista previa de datos:</h6>
+                                        <div class="preview-table" id="table-registro"></div>
+                                        
+                                        <div class="column-mapping">
+                                            <h6><i class="fas fa-exchange-alt me-2"></i>Mapeo de Columnas</h6>
+                                            <p class="text-muted small">Relaciona las columnas del Excel con los campos de la base de datos</p>
+                                            <div id="mapping-registro" class="row"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-process text-white">
+                                            <i class="fas fa-upload me-2"></i>Procesar Importación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenedor de progreso -->
+                <div class="progress-container">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5>Procesando archivo...</h5>
+                            <div class="progress mb-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                            </div>
+                            <p class="text-muted">Por favor espera mientras procesamos tu archivo.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Área de mensajes -->
+                <div id="messages-area" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // Configuración de campos para cada tipo de importación
+        const fieldMappings = {
+            maquinaria: [
+                { key: 'nombre', label: 'Nombre de Maquinaria', required: true },
+                { key: 'modelo', label: 'Modelo', required: false },
+                { key: 'marca', label: 'Marca', required: false },
+                { key: 'serial', label: 'Número Serial', required: false },
+                { key: 'año', label: 'Año', required: false },
+                { key: 'estado', label: 'Estado', required: false }
+            ],
+            cliente: [
+                { key: 'nombre', label: 'Nombre', required: true },
+                { key: 'documento', label: 'Documento', required: false },
+                { key: 'email', label: 'Email', required: false },
+                { key: 'telefono', label: 'Teléfono', required: false },
+                { key: 'direccion', label: 'Dirección', required: false },
+                { key: 'ciudad', label: 'Ciudad', required: false }
+            ],
+            proveedor: [
+                { key: 'nombre', label: 'Nombre', required: true },
+                { key: 'nit', label: 'NIT', required: false },
+                { key: 'email', label: 'Email', required: false },
+                { key: 'telefono', label: 'Teléfono', required: false },
+                { key: 'direccion', label: 'Dirección', required: false },
+                { key: 'contacto', label: 'Persona de Contacto', required: false }
+            ],
+            registro: [
+                { key: 'fecha', label: 'Fecha', required: true },
+                { key: 'cliente', label: 'Cliente', required: true },
+                { key: 'maquinaria', label: 'Maquinaria', required: true },
+                { key: 'descripcion', label: 'Descripción', required: false },
+                { key: 'costo', label: 'Costo', required: false },
+                { key: 'estado', label: 'Estado', required: false }
+            ]
+        };
+
+        // Inicializar eventos para cada sección
+        ['maquinaria', 'cliente', 'proveedor', 'registro'].forEach(section => {
+            initializeSection(section);
+        });
+
+        function initializeSection(section) {
+            const uploadArea = document.getElementById(`upload-${section}`);
+            const fileInput = document.getElementById(`file-${section}`);
+            
+            // Eventos de drag and drop
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', (e) => handleDrop(e, section));
+            
+            // Evento de cambio de archivo
+            fileInput.addEventListener('change', (e) => handleFileSelect(e, section));
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e, section) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById(`file-${section}`);
+                fileInput.files = files;
+                handleFileSelect({ target: fileInput }, section);
+            }
+        }
+
+        function handleFileSelect(e, section) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Mostrar información del archivo
+            showFileInfo(file, section);
+            
+            // Leer y mostrar preview
+            readExcelFile(file, section);
+        }
+
+        function showFileInfo(file, section) {
+            const fileInfo = document.getElementById(`info-${section}`);
+            const fileName = document.getElementById(`filename-${section}`);
+            const fileSize = document.getElementById(`filesize-${section}`);
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function removeFile(section) {
+            const fileInput = document.getElementById(`file-${section}`);
+            const fileInfo = document.getElementById(`info-${section}`);
+            const preview = document.getElementById(`preview-${section}`);
+            
+            fileInput.value = '';
+            fileInfo.style.display = 'none';
+            preview.style.display = 'none';
+        }
+
+        function readExcelFile(file, section) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                showPreview(jsonData, section);
+                createColumnMapping(jsonData[0] || [], section);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showPreview(data, section) {
+            const previewDiv = document.getElementById(`preview-${section}`);
+            const tableDiv = document.getElementById(`table-${section}`);
+            
+            if (data.length === 0) {
+                tableDiv.innerHTML = '<p class="text-muted">No se encontraron datos en el archivo.</p>';
+                return;
+            }
+            
+            let html = '<table class="table table-sm table-striped"><thead class="table-dark">';
+            
+            // Headers
+            if (data[0]) {
+                html += '<tr>';
+                data[0].forEach(header => {
+                    html += `<th>${header || 'Sin título'}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+            }
+            
+            // Mostrar solo las primeras 5 filas como preview
+            for (let i = 1; i < Math.min(6, data.length); i++) {
+                html += '<tr>';
+                data[i].forEach(cell => {
+                    html += `<td>${cell || ''}</td>`;
+                });
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            
+            if (data.length > 6) {
+                html += `<p class="text-muted small text-center">Mostrando 5 de ${data.length - 1} filas</p>`;
+            }
+            
+            tableDiv.innerHTML = html;
+            previewDiv.style.display = 'block';
+        }
+
+        function createColumnMapping(headers, section) {
+            const mappingDiv = document.getElementById(`mapping-${section}`);
+            const fields = fieldMappings[section];
+            
+            let html = '';
+            
+            fields.forEach(field => {
+                html += `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <label class="form-label">
+                            ${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}
+                        </label>
+                        <select class="form-select form-select-sm" name="mapping_${field.key}">
+                            <option value="">-- Ninguna --</option>
+                `;
+                
+                headers.forEach((header, index) => {
+                    const selected = header.toLowerCase().includes(field.key.toLowerCase()) ? 'selected' : '';
+                    html += `<option value="${index}" ${selected}>${header}</option>`;
+                });
+                
+                html += `
+                        </select>
+                    </div>
+                `;
+            });
+            
+            mappingDiv.innerHTML = html;
+        }
+
+        // Manejar envío de formularios
+        ['maquinaria', 'cliente', 'proveedor', 'registro'].forEach(section => {
+            document.getElementById(`form-${section}`).addEventListener('submit', function(e) {
+                e.preventDefault();
+                processImport(section);
+            });
+        });
+
+        function processImport(section) {
+            const form = document.getElementById(`form-${section}`);
+            const formData = new FormData(form);
+            
+            // Aquí puedes agregar la lógica para enviar los datos al servidor
+            // Por ahora solo mostramos un mensaje de simulación
+            
+            showProgress();
+            
+            // Simular proceso
+            setTimeout(() => {
+                hideProgress();
+                showMessage('success', `Importación de ${section} completada exitosamente.`);
+            }, 3000);
+        }
+
+        function showProgress() {
+            document.querySelector('.progress-container').style.display = 'block';
+            
+            let progress = 0;
+            const progressBar = document.querySelector('.progress-bar');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        function hideProgress() {
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.progress-bar').style.width = '0%';
+        }
+
+        function showMessage(type, message) {
+            const messagesArea = document.getElementById('messages-area');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            
+            messagesArea.innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+{% endblock %}

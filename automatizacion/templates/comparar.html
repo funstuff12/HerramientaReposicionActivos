@@ -1,0 +1,1214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Análisis Financiero - Defender vs Challenger{% endblock %}
+
+{% block content %}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+        --background-color: #f8fafc;
+        --card-background: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius: 0.75rem;
+        --radius-sm: 0.5rem;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analysis-container {
+        display: grid;
+        gap: 2rem;
+    }
+
+    .analysis-card {
+        background: var(--card-background);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .analysis-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+        padding: 1.5rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header.primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+    }
+
+    .card-header.success {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        color: white;
+    }
+
+    .card-header.warning {
+        background: linear-gradient(135deg, var(--warning-color), #d97706);
+        color: white;
+    }
+
+    .card-header.info {
+        background: linear-gradient(135deg, var(--info-color), #0891b2);
+        color: white;
+    }
+
+    .card-header.secondary {
+        background: linear-gradient(135deg, var(--secondary-color), #475569);
+        color: white;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background-color: var(--card-background);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: var(--card-background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .summary-card.defender {
+        border-color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.1));
+    }
+
+    .summary-card.challenger {
+        border-color: var(--success-color);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
+    }
+
+    .summary-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .summary-title.defender {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .summary-title.challenger {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-value.defender {
+        color: var(--primary-color);
+    }
+
+    .summary-value.challenger {
+        color: var(--success-color);
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .table-container {
+        background: var(--card-background);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .table th {
+        background: var(--secondary-color);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .table tr:hover {
+        background-color: var(--background-color);
+    }
+
+    .table tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, var(--info-color), #0891b2);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .alert {
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid;
+        background: rgba(37, 99, 235, 0.1);
+        border-left-color: var(--primary-color);
+        color: var(--text-primary);
+    }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .detail-table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .analysis-card {
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* Estados de validación */
+    .form-group input:invalid {
+        border-color: #ef4444;
+    }
+
+    .form-group input:valid {
+        border-color: var(--success-color);
+    }
+
+    @media print {
+        .btn, .card-header { display: none !important; }
+        .analysis-card { border: 1px solid #000 !important; }
+    }
+
+    .age-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+    }
+
+    .age-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    .age-badge.new {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .age-badge.moderate {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .age-badge.old {
+        background: #ef4444;
+        color: white;
+    }
+
+
+
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-chart-line icon"></i>
+            Análisis Financiero: Defender vs Challenger
+        </h1>
+    </div>
+
+    <div class="analysis-container">
+        <!-- Selector de Equipos -->
+        <div class="analysis-card">
+            <div class="card-header primary">
+                <i class="fas fa-cogs icon"></i>
+                Selección de Equipos
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="defender-select"><strong>Defender (Equipo Actual)</strong></label>
+                        <select class="form-select" id="defender-select" onchange="cargarDatosDefender()">
+                            <option value="">-- Selecciona Defender --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenger-select"><strong>Challenger (Equipo Nuevo)</strong></label>
+                        <select class="form-select" id="challenger-select" onchange="cargarDatosChallenger()">
+                            <option value="">-- Selecciona Challenger --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parámetros Financieros -->
+        <div class="analysis-card">
+            <div class="card-header success">
+                <i class="fas fa-calculator icon"></i>
+                Parámetros Financieros
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="wacc">WACC (%)</label>
+                        <input type="number" class="form-control" id="wacc" value="14" step="0.1" onchange="actualizarAnalisis()">
+                    </div>
+                    <div class="form-group">
+                        <label for="tax-rate">Tasa de Impuestos (%)</label>
+                        <input type="number" class="form-control" id="tax-rate" value="21" step="0.1" onchange="actualizarAnalisis()">
+                    </div>
+                    <div class="form-group">
+                        <label for="financing-rate">Tasa de Financiamiento (%)</label>
+                        <input type="number" class="form-control" id="financing-rate" value="7.5" step="0.1" onchange="actualizarAnalisis()">
+                    </div>
+                    <div class="form-group">
+                        <label for="financing-months">Meses de Financiamiento</label>
+                        <input type="number" class="form-control" id="financing-months" value="60" onchange="actualizarAnalisis()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados del Análisis -->
+        <div id="resultados-analisis" style="display: none;">
+            <!-- Resumen Ejecutivo -->
+            <div class="analysis-card">
+                <div class="card-header warning">
+                    <i class="fas fa-trophy icon"></i>
+                    Resumen Ejecutivo
+                </div>
+                <div class="card-body">
+                    <div id="recomendacion-final" class="alert">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                    <div class="results-grid">
+                        <div class="summary-card defender">
+                            <div class="summary-title defender">DEFENDER</div>
+                            <div class="summary-value defender" id="eac-defender">$0</div>
+                            <div class="summary-label">EAC Anual</div>
+                        </div>
+                        <div class="summary-card challenger">
+                            <div class="summary-title challenger">CHALLENGER</div>
+                            <div class="summary-value challenger" id="eac-challenger">$0</div>
+                            <div class="summary-label">EAC Anual</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalles Financieros -->
+            <div class="results-grid">
+                <div class="analysis-card">
+                    <div class="card-header info">
+                        <i class="fas fa-shield-alt icon"></i>
+                        Análisis Defender
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <tr>
+                                    <td><strong>Fecha de Adquisición:</strong></td>
+                                    <td id="fecha-adquisicion-defender">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Edad Actual:</strong></td>
+                                    <td id="edad-detallada-defender">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Costo de Oportunidad:</strong></td>
+                                    <td id="oportunidad-defender">$0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Costos Operativos Anuales:</strong></td>
+                                    <td id="op-costs-defender">$0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vida Útil Total:</strong></td>
+                                    <td id="vida-defender">0 años</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Valor Presente Total:</strong></td>
+                                    <td id="pv-defender">$0</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <div class="card-header success">
+                        <i class="fas fa-rocket icon"></i>
+                        Análisis Challenger
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <tr>
+                                    <td><strong>Estado:</strong></td>
+                                    <td><span class="age-badge new">EQUIPO NUEVO</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Inversión Inicial:</strong></td>
+                                    <td id="inversion-challenger">$0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Costos Operativos Anuales:</strong></td>
+                                    <td id="op-costs-challenger">$0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vida Útil:</strong></td>
+                                    <td id="vida-challenger">0 años</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Valor Presente Total:</strong></td>
+                                    <td id="pv-challenger">$0</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flujos de Caja -->
+            <div class="analysis-card">
+                <div class="card-header secondary">
+                    <i class="fas fa-table icon"></i>
+                    Análisis de Flujos de Caja
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table" id="tabla-flujos">
+                            <thead>
+                                <tr>
+                                    <th>Año</th>
+                                    <th>Defender - Flujo Bruto</th>
+                                    <th>Defender - VP</th>
+                                    <th>Challenger - Flujo Bruto</th>
+                                    <th>Challenger - VP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Amortización -->
+            <div class="analysis-card">
+                <div class="card-header secondary">
+                    <i class="fas fa-money-bill-wave icon"></i>
+                    Tabla de Amortización (Challenger)
+                </div>
+                <div class="card-body">
+                    <div style="margin-bottom: 1.5rem;">
+                        <strong>Pago Mensual: </strong><span id="pago-mensual">$0</span>
+                    </div>
+                    <div class="detail-table-container">
+                        <table class="table" id="tabla-amortizacion">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Balance Inicial</th>
+                                    <th>Pago</th>
+                                    <th>Principal</th>
+                                    <th>Interés</th>
+                                    <th>Balance Final</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="analysis-card">
+                <div class="card-body">
+                    <div class="button-group">
+                        <button class="btn btn-warning" onclick="guardarAnalisis()">
+                            <i class="fas fa-save icon"></i>
+                            Guardar Análisis
+                        </button>
+                        <button class="btn btn-info" onclick="imprimirReporte()">
+                            <i class="fas fa-print icon"></i>
+                            Imprimir Reporte
+                        </button>
+                        <a href="{% url 'dashboard_amortizacion' %}" class="btn btn-primary">
+                            <i class="fas fa-save icon"></i>
+                            Dashboard
+                        </a>
+                        <a href="{% url 'maquinaria' %}" class="btn btn-secondary">
+                            <i class="fas fa-save icon"></i>
+                            Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    let defenderData = null;
+    let challengerData = null;
+    let parametrosFinancieros = {
+        wacc: 0.14,
+        taxRate: 0.21,
+        financingRate: 0.075,
+        financingMonths: 60
+    };
+
+    // Inicializar página
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarMaquinas();
+        
+        // Pre-seleccionar si viene con maquina_id por GET
+        const urlParams = new URLSearchParams(window.location.search);
+        const maquinaId = urlParams.get('maquina_id');
+        if (maquinaId) {
+            preseleccionarMaquina(maquinaId);
+        }
+    });
+
+    function preseleccionarMaquina(maquinaId) {
+        // Primero cargar los datos de la máquina para saber si es Defender o Challenger
+        fetch(`/api/maquina/${maquinaId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Preseleccionar en el select correspondiente
+                if (data.tipo === 'Defender') {
+                    document.getElementById('defender-select').value = maquinaId;
+                    cargarDatosDefender();
+                } else {
+                    document.getElementById('challenger-select').value = maquinaId;
+                    cargarDatosChallenger();
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando máquina preseleccionada:', error);
+            });
+    }
+
+    function calcularEdadMaquina(fechaAdquisicion) {
+        if (!fechaAdquisicion) return null;
+        
+        const fechaActual = new Date();
+        const fechaCompra = new Date(fechaAdquisicion);
+        
+        // Calcular diferencia en años y meses
+        let años = fechaActual.getFullYear() - fechaCompra.getFullYear();
+        let meses = fechaActual.getMonth() - fechaCompra.getMonth();
+        
+        if (meses < 0) {
+            años--;
+            meses += 12;
+        }
+        
+        return { años, meses };
+    }
+
+
+    function formatearEdad(edad) {
+        if (!edad) return 'No disponible';
+        
+        let texto = '';
+        if (edad.años > 0) {
+            texto += `${edad.años} año${edad.años > 1 ? 's' : ''}`;
+        }
+        if (edad.meses > 0) {
+            if (texto) texto += ' y ';
+            texto += `${edad.meses} mes${edad.meses > 1 ? 'es' : ''}`;
+        }
+        
+        return texto || 'Menos de 1 mes';
+    }
+
+
+    function obtenerClaseEdad(edad) {
+        if (!edad) return 'moderate';
+        
+        const totalMeses = edad.años * 12 + edad.meses;
+        
+        if (totalMeses < 24) return 'new';        // Menos de 2 años
+        if (totalMeses < 60) return 'moderate';   // Entre 2-5 años
+        return 'old';                             // Más de 5 años
+    }
+
+    // ✅ NUEVA FUNCIÓN: Actualizar información de edad en la UI
+    function actualizarInfoEdad(maquinaData, tipo) {
+        if (tipo === 'defender' && maquinaData) {
+            const edad = calcularEdadMaquina(maquinaData.date_in_service);
+            const edadTexto = formatearEdad(edad);
+            const claseEdad = obtenerClaseEdad(edad);
+            
+            // Actualizar badge en el resumen
+            const edadBadge = document.getElementById('edad-defender');
+            if (edadBadge) {
+                edadBadge.textContent = edadTexto;
+                edadBadge.className = `age-badge ${claseEdad}`;
+            }
+            
+            // Actualizar información detallada
+            const fechaAdquisicion = document.getElementById('fecha-adquisicion-defender');
+            const edadDetallada = document.getElementById('edad-detallada-defender');
+            
+            if (fechaAdquisicion && maquinaData.date_in_service) {
+                const fecha = new Date(maquinaData.date_in_service);
+                fechaAdquisicion.textContent = fecha.toLocaleDateString('es-ES');
+            }
+            
+            if (edadDetallada) {
+                edadDetallada.innerHTML = `<span class="age-badge ${claseEdad}">${edadTexto}</span>`;
+            }
+        }
+    }
+
+    function getValidValue(value, defaultValue = 0) {
+        return (value !== null && value !== undefined && !isNaN(value)) ? value : defaultValue;
+    }
+
+
+    function cargarMaquinas() {
+        // Cargar Defenders
+        fetch('/api/maquinas/tipo/Defender/')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('defender-select');
+                data.forEach(maquina => {
+                    const option = document.createElement('option');
+                    option.value = maquina.id;
+                    option.textContent = `${maquina.nombre} ${maquina.numero_serie ? '(' + maquina.numero_serie + ')' : ''}`;
+                    select.appendChild(option);
+                });
+            });
+
+        // Cargar Challengers
+        fetch('/api/maquinas/tipo/Challenger/')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('challenger-select');
+                data.forEach(maquina => {
+                    const option = document.createElement('option');
+                    option.value = maquina.id;
+                    option.textContent = `${maquina.nombre} ${maquina.numero_serie ? '(' + maquina.numero_serie + ')' : ''}`;
+                    select.appendChild(option);
+                });
+            });
+    }
+
+    function cargarDatosDefender() {
+        const selectId = document.getElementById('defender-select').value;
+        if (!selectId) return;
+        
+        fetch(`/api/maquina/${selectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                defenderData = data;
+                // ✅ ACTUALIZAR: Calcular y mostrar edad
+                actualizarInfoEdad(data, 'defender');
+                verificarYCalcular();
+            });
+    }
+
+    function cargarDatosChallenger() {
+        const selectId = document.getElementById('challenger-select').value;
+        if (!selectId) return;
+        
+        fetch(`/api/maquina/${selectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                challengerData = data;
+                verificarYCalcular();
+            });
+    }
+
+    function actualizarParametros() {
+        parametrosFinancieros.wacc = parseFloat(document.getElementById('wacc').value) / 100;
+        parametrosFinancieros.taxRate = parseFloat(document.getElementById('tax-rate').value) / 100;
+        parametrosFinancieros.financingRate = parseFloat(document.getElementById('financing-rate').value) / 100;
+        parametrosFinancieros.financingMonths = parseInt(document.getElementById('financing-months').value);
+    }
+
+    function verificarYCalcular() {
+        if (defenderData && challengerData) {
+            actualizarParametros();
+            realizarAnalisisFinanciero();
+            document.getElementById('resultados-analisis').style.display = 'block';
+        }
+    }
+
+    function actualizarAnalisis() {
+        if (defenderData && challengerData) {
+            verificarYCalcular();
+        }
+    }
+
+    function realizarAnalisisFinanciero() {
+        console.log('=== DEBUGGING ANÁLISIS ===');
+        console.log('Defender Data:', defenderData);
+        console.log('Challenger Data:', challengerData);
+        console.log('Parámetros:', parametrosFinancieros);
+        
+        // Calcular análisis del Defender
+        const analisisDefender = calcularAnalisisDefender();
+        console.log('Resultado Defender:', analisisDefender);
+        
+        // Calcular análisis del Challenger
+        const analisisChallenger = calcularAnalisisChallenger();
+        console.log('Resultado Challenger:', analisisChallenger);
+        
+        // Actualizar interfaz
+        actualizarResultadosUI(analisisDefender, analisisChallenger);
+        
+        // Generar tablas
+        generarTablaFlujos(analisisDefender, analisisChallenger);
+        generarTablaAmortizacion();
+    }
+    function validarDatosParaCalculo(defender, challenger) {
+        const errores = [];
+        
+        // Validar Defender
+        if (!defender.acquisition_cost && !defender.purchase_price) {
+            errores.push('Defender necesita acquisition_cost o purchase_price');
+        }
+        if (!defender.useful_life) {
+            errores.push('Defender necesita useful_life');
+        }
+        
+        // Validar Challenger
+        if (!challenger.purchase_price) {
+            errores.push('Challenger necesita purchase_price');
+        }
+        if (!challenger.useful_life) {
+            errores.push('Challenger necesita useful_life');
+        }
+        
+        return errores;
+    }
+    function calcularAnalisisDefender() {
+        console.log('Defender Data:', defenderData);
+        console.log('Parámetros Financieros:', parametrosFinancieros);
+        
+        const bookValue = defenderData.acquisition_cost || defenderData.purchase_price || 0;
+        console.log('Book Value:', bookValue);
+        
+        const resaleValue = defenderData.current_resale_value || 0;
+        console.log('Resale Value:', resaleValue);
+
+        const taxOnSale = (resaleValue - bookValue) * parametrosFinancieros.taxRate;
+        const afterTaxOpportunityCost = resaleValue - taxOnSale;
+        
+        const annualOpEx = (defenderData.annual_maintenance_labor_parts || 0) + 
+                        ((defenderData.operator_labor_cost || 0) * (defenderData.monthly_operating_hours || 0) * 12);
+        
+        const lifeYears = (defenderData.useful_life || 120) / 12;
+        
+        let pvDefender = afterTaxOpportunityCost;
+        const flujos = [];
+        
+        for (let year = 1; year <= lifeYears; year++) {
+            const depreciation = (bookValue - (defenderData.salvage_value || 0)) / lifeYears;
+            const taxShield = depreciation * parametrosFinancieros.taxRate;
+            const afterTaxCashFlow = annualOpEx * (1 - parametrosFinancieros.taxRate) - taxShield;
+            const pv = afterTaxCashFlow / Math.pow(1 + parametrosFinancieros.wacc, year);
+            
+            pvDefender += pv;
+            flujos.push({
+                year,
+                cashFlow: annualOpEx,
+                afterTaxCashFlow,
+                pv
+            });
+        }
+        
+        // Restar valor de salvamento
+        pvDefender -= (defenderData.salvage_value || 0) / Math.pow(1 + parametrosFinancieros.wacc, lifeYears);
+        
+        const eac = calcularEAC(pvDefender, lifeYears);
+        
+        return {
+            pvDefender,
+            eac,
+            afterTaxOpportunityCost,
+            annualOpEx,
+            lifeYears,
+            flujos
+        };
+    }
+
+    function calcularAnalisisChallenger() {
+        const initialCost = (challengerData.purchase_price || 0) + 
+                        (challengerData.installation_and_training_cost || 0) + 
+                        (challengerData.setup_costs || 0);
+        
+        const annualOpEx = (challengerData.annual_maintenance_labor_parts || 0) + 
+                        ((challengerData.operator_labor_cost || 0) * (challengerData.monthly_operating_hours || 0) * 12);
+        
+        const lifeYears = (challengerData.useful_life || 180) / 12;
+        const depreciableBase = (challengerData.purchase_price || 0) + (challengerData.installation_and_training_cost || 0);
+        
+        let pvChallenger = initialCost;
+        const flujos = [];
+        
+        for (let year = 1; year <= lifeYears; year++) {
+            const depreciation = (depreciableBase - (challengerData.salvage_value || 0)) / lifeYears;
+            const taxShield = depreciation * parametrosFinancieros.taxRate;
+            const afterTaxCashFlow = annualOpEx * (1 - parametrosFinancieros.taxRate) - taxShield;
+            const pv = afterTaxCashFlow / Math.pow(1 + parametrosFinancieros.wacc, year);
+            
+            pvChallenger += pv;
+            flujos.push({
+                year,
+                cashFlow: annualOpEx,
+                afterTaxCashFlow,
+                pv
+            });
+        }
+        
+        // Restar valor de salvamento
+        pvChallenger -= (challengerData.salvage_value || 0) / Math.pow(1 + parametrosFinancieros.wacc, lifeYears);
+        
+        const eac = calcularEAC(pvChallenger, lifeYears);
+        
+        return {
+            pvChallenger,
+            eac,
+            initialCost,
+            annualOpEx,
+            lifeYears,
+            flujos
+        };
+    }
+
+    function calcularEAC(pvCosts, lifeInYears) {
+        if (lifeInYears <= 0 || parametrosFinancieros.wacc <= 0) {
+            return pvCosts / (lifeInYears || 1);
+        }
+        
+        const annuityFactor = (1 - Math.pow(1 + parametrosFinancieros.wacc, -lifeInYears)) / parametrosFinancieros.wacc;
+        if (annuityFactor === 0) return pvCosts;
+        
+        const eac = pvCosts / annuityFactor;
+        return isFinite(eac) ? eac : 0;
+    }
+
+    function actualizarResultadosUI(analisisDefender, analisisChallenger) {
+        // Actualizar EACs
+        document.getElementById('eac-defender').textContent = formatCurrency(analisisDefender.eac);
+        document.getElementById('eac-challenger').textContent = formatCurrency(analisisChallenger.eac);
+        
+        // Determinar recomendación
+        const recomendacion = analisisDefender.eac < analisisChallenger.eac ? 'DEFENDER' : 'CHALLENGER';
+        const ahorro = Math.abs(analisisDefender.eac - analisisChallenger.eac);
+        
+        const recomendacionDiv = document.getElementById('recomendacion-final');
+        recomendacionDiv.className = `alert alert-${recomendacion === 'DEFENDER' ? 'primary' : 'success'}`;
+        recomendacionDiv.innerHTML = `
+            <h5><i class="fas fa-lightbulb"></i> Recomendación: <strong>${recomendacion}</strong></h5>
+            <p>Ahorro anual estimado: <strong>${formatCurrency(ahorro)}</strong></p>
+            <p>${recomendacion === 'DEFENDER' ? 
+                'Se recomienda mantener el equipo actual.' : 
+                'Se recomienda proceder con el reemplazo.'}</p>
+        `;
+        
+        // Actualizar detalles defender
+        document.getElementById('oportunidad-defender').textContent = formatCurrency(analisisDefender.afterTaxOpportunityCost);
+        document.getElementById('op-costs-defender').textContent = formatCurrency(analisisDefender.annualOpEx);
+        document.getElementById('vida-defender').textContent = `${analisisDefender.lifeYears.toFixed(1)} años`;
+        document.getElementById('pv-defender').textContent = formatCurrency(analisisDefender.pvDefender);
+        
+        // Actualizar detalles challenger
+        document.getElementById('inversion-challenger').textContent = formatCurrency(analisisChallenger.initialCost);
+        document.getElementById('op-costs-challenger').textContent = formatCurrency(analisisChallenger.annualOpEx);
+        document.getElementById('vida-challenger').textContent = `${analisisChallenger.lifeYears.toFixed(1)} años`;
+        document.getElementById('pv-challenger').textContent = formatCurrency(analisisChallenger.pvChallenger);
+    }
+
+    function generarTablaFlujos(analisisDefender, analisisChallenger) {
+        const tbody = document.getElementById('tabla-flujos').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        
+        const maxYears = Math.max(analisisDefender.lifeYears, analisisChallenger.lifeYears);
+        
+        for (let year = 1; year <= maxYears; year++) {
+            const row = tbody.insertRow();
+            
+            const defenderFlujo = analisisDefender.flujos.find(f => f.year === year);
+            const challengerFlujo = analisisChallenger.flujos.find(f => f.year === year);
+            
+            row.innerHTML = `
+                <td><strong>${year}</strong></td>
+                <td>${defenderFlujo ? formatCurrency(defenderFlujo.cashFlow) : '-'}</td>
+                <td>${defenderFlujo ? formatCurrency(defenderFlujo.pv) : '-'}</td>
+                <td>${challengerFlujo ? formatCurrency(challengerFlujo.cashFlow) : '-'}</td>
+                <td>${challengerFlujo ? formatCurrency(challengerFlujo.pv) : '-'}</td>
+            `;
+        }
+    }
+
+    function generarTablaAmortizacion() {
+        const P = (challengerData.purchase_price || 0) + (challengerData.installation_and_training_cost || 0);
+        const r = parametrosFinancieros.financingRate / 12;
+        const n = parametrosFinancieros.financingMonths;
+        
+        if (n <= 0 || P <= 0) return;
+        
+        const payment = r === 0 ? P / n : P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        
+        document.getElementById('pago-mensual').textContent = formatCurrency(payment);
+        
+        const tbody = document.getElementById('tabla-amortizacion').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        
+        let balance = P;
+        
+        for (let i = 1; i <= n; i++) {
+            const interestPayment = balance * r;
+            const principalPayment = payment - interestPayment;
+            const finalBalance = balance - principalPayment;
+            
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${i}</td>
+                <td>${formatCurrency(balance)}</td>
+                <td>${formatCurrency(payment)}</td>
+                <td>${formatCurrency(principalPayment)}</td>
+                <td>${formatCurrency(interestPayment)}</td>
+                <td>${formatCurrency(finalBalance)}</td>
+            `;
+            
+            balance = finalBalance;
+        }
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value || 0);
+    }
+
+    function guardarAnalisis() {
+        if (!defenderData || !challengerData) {
+            alert('Selecciona ambos equipos antes de guardar');
+            return;
+        }
+        
+        // ✅ Obtener parámetros actualizados del DOM
+        const parametrosActualizados = {
+            wacc: parseFloat(document.getElementById('wacc').value) / 100,  // Convertir a decimal
+            tax_rate: parseFloat(document.getElementById('tax-rate').value) / 100,  // Convertir a decimal
+            financing_rate: parseFloat(document.getElementById('financing-rate').value),  // Ya está en porcentaje
+            financing_months: parseInt(document.getElementById('financing-months').value)
+        };
+        
+        // Calcular los resultados con los parámetros actuales
+        const analisisDefender = calcularAnalisisDefender();
+        const analisisChallenger = calcularAnalisisChallenger();
+        
+        // Determinar recomendación
+        const recomendacion = analisisDefender.eac < analisisChallenger.eac ? 'Defender' : 'Challenger';
+        
+        const analisisData = {
+            nombre_analisis: `${defenderData.nombre} vs ${challengerData.nombre} - ${new Date().toLocaleDateString()}`,
+            defender_id: defenderData.id,
+            challenger_id: challengerData.id,
+            
+            // ✅ Parámetros financieros reales del formulario
+            wacc: parametrosActualizados.wacc,
+            tax_rate: parametrosActualizados.tax_rate,
+            financing_rate: parametrosActualizados.financing_rate,
+            financing_months: parametrosActualizados.financing_months,
+            
+            // Resultados calculados
+            pv_defender: analisisDefender.pvDefender,
+            eac_defender: analisisDefender.eac,
+            pv_challenger: analisisChallenger.pvChallenger,
+            eac_challenger: analisisChallenger.eac,
+            recomendacion: recomendacion,
+            
+            // Datos para generar flujos de caja y tabla de amortización
+            flujos_defender: analisisDefender.flujos,
+            flujos_challenger: analisisChallenger.flujos
+        };
+        
+        console.log('Datos a enviar:', analisisData);  // Para debugging
+        
+        fetch('/api/guardar-analisis/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(analisisData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Análisis guardado exitosamente');
+                // Opcional: redirigir a una página de listado o dashboard
+                // window.location.href = '/dashboard-amortizacion/';
+            } else {
+                alert('Error al guardar el análisis: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al comunicarse con el servidor');
+        });
+    }
+
+
+    function imprimirReporte() {
+        window.print();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+{% endblock %}

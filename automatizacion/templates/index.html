@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding: 2rem;
+            color: #1a202c;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .welcome-title {
+            color: #1a202c;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .welcome-subtitle {
+            color: #4a5568;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .module-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            animation: fadeInUp 0.8s ease-out;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .module-card:hover {
+            border-color: #3182ce;
+            box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .module-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .module-card:nth-child(1) .module-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .module-card:nth-child(2) .module-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .module-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 0;
+        }
+
+        .module-description {
+            color: #4a5568;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .module-features {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .module-features li {
+            color: #2d3748;
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .module-features li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #3182ce;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .quick-actions {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .quick-actions h3 {
+            color: #1a202c;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 10px;
+            text-decoration: none;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            color: #495057;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        .action-button:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .module-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .module-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sección de Bienvenida -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Sistema de Gestión Empresarial</h1>
+            <p class="welcome-subtitle">Plataforma integral para la administración y control de procesos</p>
+        </div>
+
+        <!-- Grid de Módulos -->
+        <div class="dashboard-grid">
+            <!-- Módulo de Maquinaria -->
+            <div class="module-card" onclick="window.location.href='{% url 'maquinaria' %}'">
+                <div class="module-header">
+                    <div class="module-icon">
+                        M
+                    </div>
+                    <h2 class="module-title">Gestión de Maquinaria</h2>
+                </div>
+                <p class="module-description">
+                    Administra y controla todos los equipos y maquinaria de la empresa de manera eficiente y centralizada.
+                </p>
+                <ul class="module-features">
+                    <li>Registro de equipos</li>
+                    <li>Reportes de estado</li>
+                    <li>Control de costos</li>
+                </ul>
+            </div>
+
+            <!-- Módulo de Tesorería -->
+            <div class="module-card" onclick="window.location.href='{% url 'tesoreria' %}'">
+                <div class="module-header">
+                    <div class="module-icon">
+                        F
+                    </div>
+                    <h2 class="module-title">Tesorería y Finanzas</h2>
+                </div>
+                <p class="module-description">
+                    Controla las finanzas empresariales con herramientas avanzadas de gestión monetaria y análisis financiero.
+                </p>
+                <ul class="module-features">
+                    <li>Control de ingresos</li>
+                    <li>Gestión de gastos</li>
+                    <li>Reportes financieros</li>
+                    <li>Flujo de caja</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="quick-actions">
+            <h3>
+                ⚡ Acciones Rápidas
+            </h3>
+            <div class="actions-grid">
+                <a href="{% url 'cuentas_por_cobrar' %}" class="action-button">
+                    📊 Ver Cuentas por Cobrar
+                </a>
+                <a href="{% url 'cuentas_por_pagar' %}" class="action-button">
+                    📊 Ver Cuentas por Pagar
+                </a>
+                <a href="{% url 'registros_crear' %}" class="action-button">
+                    ➕ Nuevo Registro
+                </a>
+                <a href="{% url 'dashboard_amortizacion' %}" class="action-button">
+                    📈 Dashboards
+                </a>
+                <a href="{% url 'analisis_financiero' %}" class="action-button">
+                    🔧 Comparacion de Maquinaria
+                </a>
+                <a href="{% url 'cargar_excel_completo' %}" class="action-button">
+                    📊 Importar Datos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(module) {
+            // Navegación basada en las URLs de Django
+            if (module === 'maquinaria') {
+                window.location.href = "{% url 'maquinaria' %}";
+            } else if (module === 'tesoreria') {
+                window.location.href = "{% url 'tesoreria' %}";
+            }
+        }
+
+        // Animación de entrada para las tarjetas
+        const cards = document.querySelectorAll('.module-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    </script>
+</body>
+
+{% endblock %}

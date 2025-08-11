@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Maquinaria{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Estilos generales */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #343a40;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+
+    /* Estilos para la barra de búsqueda */
+    .search-container {
+        width: 100%;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .search-form {
+        display: flex;
+        gap: 1rem;
+    }
+    .search-form input[type="text"] {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    .search-form button {
+        background-color: #6c757d;
+        cursor: pointer;
+    }
+    .search-form button:hover {
+        background-color: #5a6268;
+    }
+    
+    /* Estilos para los botones de acción en la tabla */
+    .action-buttons a, .action-buttons button {
+        color: white !important;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: transform 0.2s;
+        display: inline-block;
+        margin-right: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+    .action-buttons a:hover, .action-buttons button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-edit { background-color: #ffc107; color: #000 !important; }
+    .btn-delete { background-color: #dc3545; }
+    
+    /* Botones del header */
+    .btn-secondary {
+        background-color: #288d0eff;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        border: none;
+        margin-left: 0.5rem;
+    }
+    .btn-secondary:hover {
+        background-color: #1e6b07;
+        color: white;
+    }
+
+    .btn-warning {
+        background-color: #dc981bff;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        border: none;
+        margin-left: 0.5rem;
+    }
+    .btn-warning:hover {
+        background-color: #b8811a;
+        color: white;
+    }
+
+    /* Estilos de la tabla */
+    .content-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .content-table thead tr {
+        background-color: #e9ecef;
+        color: #495057;
+        text-align: left;
+    }
+    .content-table th, .content-table td {
+        padding: 1rem;
+    }
+    .content-table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+    .content-table tbody tr:last-of-type {
+        border-bottom: none;
+    }
+    
+    /* Estilo para el UUID clickeable */
+    .uuid-link {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #198754;
+        text-decoration: none;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        display: inline-block;
+        word-break: break-all;
+        transition: all 0.2s;
+        font-weight: 500;
+        max-width: 250px;
+        overflow-wrap: break-word;
+    }
+    
+    .uuid-link:hover {
+        background-color: #198754;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Badge para el tipo de máquina */
+    .type-badge {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+</style>
+
+<div class="page-header">
+    <h1>Listado de Maquinaria</h1>
+    <div>
+        <a href="{% url 'crear_maquinaria' %}" class="btn-primary">Crear Máquina</a>
+        <a href="{% url 'analisis_financiero' %}" class="btn-secondary">Comparar</a>
+        <a href="{% url 'dashboard_amortizacion' %}" class="btn-warning">Dashboards</a>
+    </div>
+</div>
+
+<div class="search-container">
+    <form method="get" action="{% url 'maquinaria' %}" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por Nombre o Número de Serie..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn-primary">Buscar</button>
+    </form>
+</div>
+
+<table class="content-table">
+    <thead>
+        <tr>
+            <th>ID de Máquina</th>
+            <th>Nombre</th>
+            <th>Número de Serie</th>
+            <th>Tipo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for maquina in maquinas %}
+        <tr>
+            <td>
+                {% if maquina.id %}
+                    <a href="{% url 'editar_maquina' maquina.id %}" class="uuid-link" 
+                       title="Click para ver detalles de la máquina">
+                        {{ maquina.id }}
+                    </a>
+                {% else %}
+                    <span style="color: #dc3545;">ID no válido</span>
+                {% endif %}
+            </td>
+            <td><strong>{{ maquina.nombre }}</strong></td>
+            <td>{{ maquina.numero_serie|default:"N/A" }}</td>
+            <td>
+                <span class="type-badge">{{ maquina.get_tipo_display }}</span>
+            </td>
+            <td class="action-buttons">
+                {% if maquina.id %}
+                    <!-- Eliminar con confirmación directa usando formulario POST -->
+                    <form method="post" action="{% url 'maquinaria_eliminar' maquina.id %}" style="display: inline;" 
+                          onsubmit="return confirm('¿Estás seguro de eliminar la máquina {{ maquina.nombre }}? Esta acción no se puede deshacer.')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete">Eliminar</button>
+                    </form>
+                {% else %}
+                    <span style="color: #dc3545;">ID no válido</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">
+                {% if request.GET.q %}
+                    No se encontraron máquinas con los criterios de búsqueda "{{ request.GET.q }}".
+                {% else %}
+                    No hay máquinas registradas.
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if maquinas %}
+<div style="margin-top: 1rem; color: #6c757d; font-size: 0.9rem;">
+    Total de máquinas: {{ maquinas|length }}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,1232 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Registros{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos CSS estandarizados */
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --client-color: #059669; /* Verde para clientes */
+        --background-color: #f8fafc;
+        --card-background: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius: 0.75rem;
+        --radius-sm: 0.5rem;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--primary-color), var(--client-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .form-container {
+        background: var(--card-background);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        animation: fadeIn 0.5s ease;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--client-color));
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .form-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .registro-id-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        margin-top: 1rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .form-content {
+        padding: 2.5rem;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        color: white;
+        padding: 1.5rem 2rem;
+        margin: 2rem -2.5rem 2rem -2.5rem;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .section-header:first-child {
+        margin-top: 0;
+    }
+
+    .section-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background-color: var(--card-background);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-group small {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning-color), #d97706);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    .obligacion-row, .pago-row {
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .obligacion-row:hover, .pago-row:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+        border-color: var(--primary-color);
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: var(--danger-color);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .info-banner {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        border-left: 4px solid var(--primary-color);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .info-banner h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .info-banner p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .obligacion-reference {
+        background: #f0f9ff;
+        border: 1px solid #0ea5e9;
+        border-radius: var(--radius-sm);
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #0369a1;
+    }
+
+    .add-btn-container {
+        text-align: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+
+
+    @media (max-width: 768px) {
+        .container { padding: 1rem; }
+        .page-header { flex-direction: column; gap: 1rem; text-align: center; }
+        .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+        .form-content { padding: 1.5rem; }
+        .section-header { margin: 2rem -1.5rem 2rem -1.5rem; padding: 1rem 1.5rem; }
+        .button-group { flex-direction: column; }
+        .btn { width: 100%; justify-content: center; }
+        .obligacion-row, .pago-row {
+            padding: 1rem;
+        }
+        .totales-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Gestión de Registros</h1>
+        <div>
+            <a href="{% url 'registros_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Lista
+            </a>
+        </div>
+    </div>
+
+    <div class="info-banner">
+        <h3>Editar Registro</h3>
+        <p>Modifique los datos del registro, gestione obligaciones y pagos. Todos los cambios se guardarán al hacer clic en "Actualizar Registro".</p>
+    </div>
+
+    <form method="post" id="registro-form" class="form-container">
+        {% csrf_token %}
+        
+        <div class="form-header">
+            <h2>Editar Registro</h2>
+            <p>Actualización de información del registro y transacciones asociadas</p>
+            <div class="registro-id-badge">
+                ID: {{ registro.id }}
+            </div>
+        </div>
+
+        <div class="form-content">
+            <!-- Información Básica del Registro -->
+            <div class="section-header">
+                <i class="fas fa-info-circle section-icon"></i>
+                <span>Información Básica</span>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.id.id_for_label }}">{{ form.id.label }}</label>
+                    {{ form.id }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.cliente.id_for_label }}">{{ form.cliente.label }}</label>
+                    {{ form.cliente }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.fecha_entrega_cliente.id_for_label }}">{{ form.fecha_entrega_cliente.label }}</label>
+                    {{ form.fecha_entrega_cliente }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.valor_cobrar_cliente.id_for_label }}">{{ form.valor_cobrar_cliente.label }}</label>
+                    {{ form.valor_cobrar_cliente }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.fecha_limite_cobro.id_for_label }}">{{ form.fecha_limite_cobro.label }}</label>
+                    {{ form.fecha_limite_cobro }}
+                    <small>Se calcula automáticamente</small>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.estado_cobro.id_for_label }}">{{ form.estado_cobro.label }}</label>
+                    {{ form.estado_cobro }}
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.observaciones.id_for_label }}">{{ form.observaciones.label }}</label>
+                    {{ form.observaciones }}
+                </div>
+            </div>
+
+
+
+            <!-- Sección de Obligaciones -->
+            <div class="section-header">
+                <i class="fas fa-file-invoice-dollar section-icon"></i>
+                <span>Obligaciones con Proveedores</span>
+            </div>
+            
+            <div id="obligaciones-container">
+                <!-- Las obligaciones se cargarán aquí dinámicamente -->
+            </div>
+
+            <div class="add-btn-container">
+                <button type="button" class="btn btn-success" onclick="agregarObligacion()">
+                    <i class="fas fa-plus"></i> Agregar Obligación
+                </button>
+            </div>
+
+            <!-- Sección de Pagos del Cliente -->
+            <div class="section-header">
+                <i class="fas fa-money-bill-wave section-icon"></i>
+                <span>Pagos del Cliente</span>
+            </div>
+            
+            <div id="pagos-cliente-container">
+                <!-- Los pagos del cliente se cargarán aquí dinámicamente -->
+            </div>
+
+            <div class="add-btn-container">
+                <button type="button" class="btn btn-primary" onclick="agregarPagoCliente()">
+                    <i class="fas fa-plus"></i> Agregar Pago Cliente
+                </button>
+            </div>
+
+            <!-- Sección de Pagos a Proveedores -->
+            <div class="section-header">
+                <i class="fas fa-hand-holding-usd section-icon"></i>
+                <span>Pagos a Proveedores</span>
+            </div>
+            
+            <div id="pagos-proveedor-container">
+                <!-- Los pagos a proveedores se cargarán aquí dinámicamente -->
+            </div>
+
+            <div class="add-btn-container">
+                <button type="button" class="btn btn-warning" onclick="agregarPagoProveedor()">
+                    <i class="fas fa-plus"></i> Agregar Pago Proveedor
+                </button>
+            </div>
+
+            <!-- Campos ocultos para enviar datos JSON -->
+            <input type="hidden" id="obligaciones_data" name="obligaciones_data" value="[]">
+            <input type="hidden" id="pagos_cliente_data" name="pagos_cliente_data" value="[]">
+            <input type="hidden" id="pagos_proveedor_data" name="pagos_proveedor_data" value="[]">
+
+            <!-- Botones de acción -->
+            <div class="button-group">
+                <div>
+                    <a href="{% url 'registros_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a Lista
+                    </a>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> Actualizar Registro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Variables globales
+    const clientesData = {{ clientes_data|safe }};
+    const proveedoresData = {{ proveedores_data|safe }};
+    const registroData = {{ registro_data|safe }};
+    const metodosDepago = {{ metodos_pago|safe }};
+    const fechaHoy = '{{ fecha_hoy }}';
+
+    let obligacionesArray = [];
+    let pagosClienteArray = [];
+    let pagosProveedorArray = [];
+    let valorClienteOriginal = 0;
+
+    // Función para formatear números en formato colombiano (puntos para miles, comas para decimales)
+    function formatearPrecio(valor) {
+        if (!valor || isNaN(valor)) return '$0,00';
+        
+        const numero = parseFloat(valor);
+        return '$' + numero.toLocaleString('es-CO', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Función para desformatear precio (convertir de formato colombiano a número)
+    function desformatearPrecio(valorFormateado) {
+        if (!valorFormateado) return 0;
+        
+        // Eliminar el símbolo $ y espacios
+        let valorLimpio = valorFormateado.toString().replace(/\$/g, '').trim();
+        
+        // Eliminar puntos (separadores de miles) y reemplazar coma por punto (decimal)
+        valorLimpio = valorLimpio
+            .replace(/\./g, '')  // Eliminar puntos
+            .replace(/,/g, '.'); // Reemplazar coma por punto
+        
+        return parseFloat(valorLimpio) || 0;
+    }
+
+    // Función mejorada para formatear input mientras el usuario escribe
+    function formatearInputPrecio(input) {
+        let valor = input.value;
+        
+        // Si está vacío, no hacer nada
+        if (!valor) return 0;
+        
+        // Eliminar todo excepto números, puntos y comas
+        valor = valor.replace(/[^\d.,]/g, '');
+        
+        const numero = desformatearPrecio(valor);
+        
+        if (!isNaN(numero) && numero >= 0) {
+            input.value = formatearPrecio(numero);
+            return numero;
+        }
+        return 0;
+    }
+
+    // Inicializar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar datos existentes
+        obligacionesArray = registroData.obligaciones || [];
+        pagosClienteArray = registroData.pagos_cliente || [];
+        pagosProveedorArray = registroData.pagos_proveedor || [];
+
+        // PRIMERO configurar eventos
+        configurarEventos();
+        
+        // DESPUÉS obtener y establecer el valor inicial del cliente SIN formatear inicialmente
+        const valorClienteInput = document.getElementById('id_valor_cobrar_cliente');
+        if (valorClienteInput) {
+            let valorInicial = 0;
+            
+            // Obtener el valor desde Django (ya viene como string del backend)
+            if (valorClienteInput.value && valorClienteInput.value.trim() !== '') {
+                valorInicial = parseFloat(valorClienteInput.value) || 0;
+            } 
+            // Si no hay valor en el input, intentar desde registroData
+            else if (registroData && registroData.valor_cobrar_cliente) {
+                valorInicial = parseFloat(registroData.valor_cobrar_cliente) || 0;
+            }
+            
+            // Establecer el valor original para referencia
+            valorClienteOriginal = valorInicial;
+            
+            // IMPORTANTE: Mantener el valor como número en el input inicialmente
+            // Se formateará solo cuando el usuario termine de editarlo
+            if (valorInicial > 0) {
+                valorClienteInput.value = valorInicial.toString();
+            }
+        }
+
+        // Renderizar todos los elementos
+        renderizarObligaciones();
+        renderizarPagosCliente();
+        renderizarPagosProveedor();
+        
+        // Actualizar totales al final
+        actualizarTotales();
+    });
+
+
+    function configurarEventos() {
+        // Evento para cambio de cliente (recalcular fecha límite)
+        const clienteSelect = document.getElementById('id_cliente');
+        if (clienteSelect) {
+            clienteSelect.addEventListener('change', function() {
+                calcularFechaLimiteCobro();
+                marcarCambios();
+            });
+        }
+
+        // Evento para cambio de fecha de entrega
+        const fechaEntregaInput = document.getElementById('id_fecha_entrega_cliente');
+        if (fechaEntregaInput) {
+            fechaEntregaInput.addEventListener('change', function() {
+                calcularFechaLimiteCobro();
+                marcarCambios();
+            });
+        }
+
+        // EVENTOS MEJORADOS para el valor a cobrar
+        const valorClienteInput = document.getElementById('id_valor_cobrar_cliente');
+        if (valorClienteInput) {
+            // Solo actualizar totales durante la escritura, SIN formatear
+            valorClienteInput.addEventListener('input', function() {
+                actualizarTotales();
+                marcarCambios();
+            });
+            
+            // Formatear SOLO cuando pierde el foco Y el usuario no está editando
+            valorClienteInput.addEventListener('blur', function() {
+                if (this.value && this.value.trim() !== '') {
+                    const valorNumerico = desformatearPrecio(this.value);
+                    if (!isNaN(valorNumerico) && valorNumerico >= 0) {
+                        valorClienteOriginal = valorNumerico;
+                        this.value = formatearPrecio(valorNumerico);
+                        actualizarTotales();
+                    }
+                }
+            });
+
+            // Desformatear cuando gana el foco para facilitar edición
+            valorClienteInput.addEventListener('focus', function() {
+                if (this.value && this.value.includes('$')) {
+                    const valorNumerico = desformatearPrecio(this.value);
+                    if (valorNumerico > 0) {
+                        this.value = valorNumerico.toString();
+                    }
+                }
+            });
+
+            // Permitir solo números, puntos y comas durante la escritura
+            valorClienteInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                const currentValue = this.value;
+                
+                // Permitir: números, punto, coma, backspace, delete, tab, escape, enter
+                if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                    // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+                
+                // Permitir solo números, punto y coma
+                if (!/[\d.,]/.test(char)) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // No permitir más de una coma
+                if (char === ',' && currentValue.includes(',')) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+        }
+    }
+
+    function calcularFechaLimiteCobro() {
+        const clienteSelect = document.getElementById('id_cliente');
+        const fechaEntregaInput = document.getElementById('id_fecha_entrega_cliente');
+        const fechaLimiteInput = document.getElementById('id_fecha_limite_cobro');
+        
+        if (!clienteSelect || !fechaEntregaInput || !fechaLimiteInput) return;
+        
+        const clienteId = clienteSelect.value;
+        const fechaEntrega = fechaEntregaInput.value;
+        
+        if (clienteId && fechaEntrega && clientesData[clienteId]) {
+            const terminos = clientesData[clienteId].terminos;
+            const fecha = new Date(fechaEntrega);
+            fecha.setDate(fecha.getDate() + terminos);
+            
+            const fechaLimite = fecha.toISOString().split('T')[0];
+            fechaLimiteInput.value = fechaLimite;
+        }
+    }
+
+    // Funciones para Obligaciones
+    function agregarObligacion() {
+        const nuevaObligacion = {
+            id: Date.now(),
+            proveedor_id: '',
+            proveedor_nombre: '',
+            valor_pagar: '',
+            fecha_recepcion: fechaHoy,
+            descripcion: '',
+            referencia: ''
+        };
+        
+        obligacionesArray.push(nuevaObligacion);
+        renderizarObligaciones();
+    }
+
+    function eliminarObligacion(index) {
+        if (confirm('¿Está seguro de eliminar esta obligación?')) {
+            obligacionesArray.splice(index, 1);
+            renderizarObligaciones();
+            actualizarTotales();
+        }
+    }
+
+    function renderizarObligaciones() {
+        const container = document.getElementById('obligaciones-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        obligacionesArray.forEach((obligacion, index) => {
+            const valorFormateado = obligacion.valor_pagar ? formatearPrecio(obligacion.valor_pagar) : '';
+            
+            const obligacionHtml = `
+                <div class="obligacion-row">
+                    <button type="button" class="remove-btn" onclick="eliminarObligacion(${index})" title="Eliminar obligación">
+                        ×
+                    </button>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Proveedor</label>
+                            <select class="form-control" onchange="actualizarProveedorObligacion(${index}, this)">
+                                <option value="">Seleccionar proveedor...</option>
+                                ${Object.keys(proveedoresData).map(id => `
+                                    <option value="${id}" ${obligacion.proveedor_id == id ? 'selected' : ''}>
+                                        ${proveedoresData[id].nombre}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor a Pagar</label>
+                            <input type="text" class="form-control precio-input" value="${valorFormateado}" 
+                                   onblur="formatearYActualizarObligacion(${index}, 'valor_pagar', this)"
+                                   oninput="actualizarObligacionSinFormato(${index}, 'valor_pagar', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Recepción</label>
+                            <input type="date" class="form-control" value="${obligacion.fecha_recepcion}" 
+                                   onchange="actualizarObligacion(${index}, 'fecha_recepcion', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <input type="text" class="form-control" value="${obligacion.descripcion || ''}" 
+                                   onchange="actualizarObligacion(${index}, 'descripcion', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia</label>
+                            <input type="text" class="form-control" value="${obligacion.referencia || ''}" 
+                                   onchange="actualizarObligacion(${index}, 'referencia', this.value)">
+                        </div>
+                    </div>
+                    ${obligacion.fecha_vencimiento ? `
+                        <div class="obligacion-reference">
+                            <i class="fas fa-calendar-alt"></i> 
+                            Fecha de vencimiento: ${obligacion.fecha_vencimiento}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', obligacionHtml);
+        });
+        
+        actualizarCampoOculto('obligaciones_data', obligacionesArray);
+    }
+
+    function formatearYActualizarObligacion(index, campo, input) {
+        const valorDesformateado = desformatearPrecio(input.value);
+        obligacionesArray[index][campo] = valorDesformateado;
+        input.value = formatearPrecio(valorDesformateado);
+        actualizarTotales();
+        actualizarCampoOculto('obligaciones_data', obligacionesArray);
+    }
+
+    function actualizarObligacionSinFormato(index, campo, valor) {
+        const valorDesformateado = desformatearPrecio(valor);
+        obligacionesArray[index][campo] = valorDesformateado;
+        if (campo === 'valor_pagar') {
+            actualizarTotales();
+        }
+        actualizarCampoOculto('obligaciones_data', obligacionesArray);
+    }
+
+    function actualizarProveedorObligacion(index, select) {
+        const proveedorId = select.value;
+        if (proveedorId && proveedoresData[proveedorId]) {
+            obligacionesArray[index].proveedor_id = proveedorId;
+            obligacionesArray[index].proveedor_nombre = proveedoresData[proveedorId].nombre;
+            
+            // Calcular fecha de vencimiento si hay fecha de recepción
+            if (obligacionesArray[index].fecha_recepcion) {
+                const fechaRecepcion = new Date(obligacionesArray[index].fecha_recepcion);
+                fechaRecepcion.setDate(fechaRecepcion.getDate() + proveedoresData[proveedorId].terminos);
+                obligacionesArray[index].fecha_vencimiento = fechaRecepcion.toISOString().split('T')[0];
+            }
+            
+            renderizarObligaciones();
+            renderizarPagosProveedor();
+        }
+    }
+
+    function actualizarObligacion(index, campo, valor) {
+        obligacionesArray[index][campo] = valor;
+        
+        // Si se cambió la fecha de recepción, recalcular fecha de vencimiento
+        if (campo === 'fecha_recepcion' && obligacionesArray[index].proveedor_id) {
+            const proveedorId = obligacionesArray[index].proveedor_id;
+            if (proveedoresData[proveedorId] && valor) {
+                const fechaRecepcion = new Date(valor);
+                fechaRecepcion.setDate(fechaRecepcion.getDate() + proveedoresData[proveedorId].terminos);
+                obligacionesArray[index].fecha_vencimiento = fechaRecepcion.toISOString().split('T')[0];
+                renderizarObligaciones();
+            }
+        }
+        
+        if (campo === 'valor_pagar') {
+            actualizarTotales();
+        }
+        
+        actualizarCampoOculto('obligaciones_data', obligacionesArray);
+    }
+
+    // Funciones para Pagos del Cliente
+    function agregarPagoCliente() {
+        const nuevoPago = {
+            id: Date.now(),
+            monto: '',
+            fecha_pago: fechaHoy,
+            metodo_pago: 'transferencia',
+            referencia: '',
+            observaciones: ''
+        };
+        
+        pagosClienteArray.push(nuevoPago);
+        renderizarPagosCliente();
+    }
+
+    function eliminarPagoCliente(index) {
+        if (confirm('¿Está seguro de eliminar este pago?')) {
+            pagosClienteArray.splice(index, 1);
+            renderizarPagosCliente();
+            actualizarTotales();
+        }
+    }
+
+    function renderizarPagosCliente() {
+        const container = document.getElementById('pagos-cliente-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        pagosClienteArray.forEach((pago, index) => {
+            const montoFormateado = pago.monto ? formatearPrecio(pago.monto) : '';
+            
+            // Generar opciones de métodos de pago correctamente
+            const metodosOptions = metodosDepago.map(metodo => {
+                const valor = Array.isArray(metodo) ? metodo[0] : metodo;
+                const etiqueta = Array.isArray(metodo) ? metodo[1] : metodo;
+                return `<option value="${valor}" ${pago.metodo_pago === valor ? 'selected' : ''}>${etiqueta}</option>`;
+            }).join('');
+
+            const pagoHtml = `
+                <div class="pago-row">
+                    <button type="button" class="remove-btn" onclick="eliminarPagoCliente(${index})" title="Eliminar pago">
+                        ×
+                    </button>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Monto</label>
+                            <input type="text" class="form-control precio-input" value="${montoFormateado}" 
+                                   onblur="formatearYActualizarPagoCliente(${index}, 'monto', this)"
+                                   oninput="actualizarPagoClienteSinFormato(${index}, 'monto', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Pago</label>
+                            <input type="date" class="form-control" value="${pago.fecha_pago}" 
+                                   onchange="actualizarPagoCliente(${index}, 'fecha_pago', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Método</label>
+                            <select class="form-control" onchange="actualizarPagoCliente(${index}, 'metodo_pago', this.value)">
+                                ${metodosOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia</label>
+                            <input type="text" class="form-control" value="${pago.referencia || ''}" 
+                                   onchange="actualizarPagoCliente(${index}, 'referencia', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <input type="text" class="form-control" value="${pago.observaciones || ''}" 
+                                   onchange="actualizarPagoCliente(${index}, 'observaciones', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', pagoHtml);
+        });
+        
+        actualizarCampoOculto('pagos_cliente_data', pagosClienteArray);
+    }
+
+    function formatearYActualizarPagoCliente(index, campo, input) {
+        const valorDesformateado = desformatearPrecio(input.value);
+        pagosClienteArray[index][campo] = valorDesformateado;
+        input.value = formatearPrecio(valorDesformateado);
+        actualizarTotales();
+        actualizarCampoOculto('pagos_cliente_data', pagosClienteArray);
+    }
+
+    function actualizarPagoClienteSinFormato(index, campo, valor) {
+        const valorDesformateado = desformatearPrecio(valor);
+        pagosClienteArray[index][campo] = valorDesformateado;
+        if (campo === 'monto') {
+            actualizarTotales();
+        }
+        actualizarCampoOculto('pagos_cliente_data', pagosClienteArray);
+    }
+
+    function actualizarPagoCliente(index, campo, valor) {
+        pagosClienteArray[index][campo] = valor;
+        
+        if (campo === 'monto') {
+            actualizarTotales();
+        }
+        
+        actualizarCampoOculto('pagos_cliente_data', pagosClienteArray);
+    }
+
+    // Funciones para Pagos a Proveedores
+    function agregarPagoProveedor() {
+        const nuevoPago = {
+            id: Date.now(),
+            monto: '',
+            fecha_pago: fechaHoy,
+            metodo_pago: 'transferencia',
+            referencia: '',
+            observaciones: '',
+            obligacion_id: ''
+        };
+        
+        pagosProveedorArray.push(nuevoPago);
+        renderizarPagosProveedor();
+    }
+
+    function eliminarPagoProveedor(index) {
+        if (confirm('¿Está seguro de eliminar este pago?')) {
+            pagosProveedorArray.splice(index, 1);
+            renderizarPagosProveedor();
+            actualizarTotales();
+        }
+    }
+
+    function renderizarPagosProveedor() {
+        const container = document.getElementById('pagos-proveedor-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        pagosProveedorArray.forEach((pago, index) => {
+            const montoFormateado = pago.monto ? formatearPrecio(pago.monto) : '';
+            
+            // Generar opciones de obligaciones
+            const obligacionesOptions = obligacionesArray
+                .filter(obl => obl.proveedor_id && obl.proveedor_nombre)
+                .map(obl => `
+                    <option value="${obl.id}" ${pago.obligacion_id == obl.id ? 'selected' : ''}>
+                        ${obl.proveedor_nombre} - ${formatearPrecio(obl.valor_pagar || 0)} (${obl.descripcion || 'Sin descripción'})
+                    </option>
+                `).join('');
+
+            // Generar opciones de métodos de pago correctamente
+            const metodosOptions = metodosDepago.map(metodo => {
+                const valor = Array.isArray(metodo) ? metodo[0] : metodo;
+                const etiqueta = Array.isArray(metodo) ? metodo[1] : metodo;
+                return `<option value="${valor}" ${pago.metodo_pago === valor ? 'selected' : ''}>${etiqueta}</option>`;
+            }).join('');
+
+            const pagoHtml = `
+                <div class="pago-row">
+                    <button type="button" class="remove-btn" onclick="eliminarPagoProveedor(${index})" title="Eliminar pago">
+                        ×
+                    </button>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Obligación Relacionada</label>
+                            <select class="form-control" onchange="actualizarPagoProveedor(${index}, 'obligacion_id', this.value)">
+                                <option value="">Seleccionar obligación...</option>
+                                ${obligacionesOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto</label>
+                            <input type="text" class="form-control precio-input" value="${montoFormateado}" 
+                                   onblur="formatearYActualizarPagoProveedor(${index}, 'monto', this)"
+                                   oninput="actualizarPagoProveedorSinFormato(${index}, 'monto', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Pago</label>
+                            <input type="date" class="form-control" value="${pago.fecha_pago}" 
+                                   onchange="actualizarPagoProveedor(${index}, 'fecha_pago', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Método</label>
+                            <select class="form-control" onchange="actualizarPagoProveedor(${index}, 'metodo_pago', this.value)">
+                                ${metodosOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia</label>
+                            <input type="text" class="form-control" value="${pago.referencia || ''}" 
+                                   onchange="actualizarPagoProveedor(${index}, 'referencia', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <input type="text" class="form-control" value="${pago.observaciones || ''}" 
+                                   onchange="actualizarPagoProveedor(${index}, 'observaciones', this.value)">
+                        </div>
+                    </div>
+                    ${pago.obligacion_id ? `
+                        <div class="obligacion-reference">
+                            <i class="fas fa-link"></i> 
+                            Relacionado con obligación: ${getObligacionInfo(pago.obligacion_id)}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', pagoHtml);
+        });
+        
+        actualizarCampoOculto('pagos_proveedor_data', pagosProveedorArray);
+    }
+
+    function formatearYActualizarPagoProveedor(index, campo, input) {
+        const valorDesformateado = desformatearPrecio(input.value);
+        pagosProveedorArray[index][campo] = valorDesformateado;
+        input.value = formatearPrecio(valorDesformateado);
+        actualizarTotales();
+        actualizarCampoOculto('pagos_proveedor_data', pagosProveedorArray);
+    }
+
+    function actualizarPagoProveedorSinFormato(index, campo, valor) {
+        const valorDesformateado = desformatearPrecio(valor);
+        pagosProveedorArray[index][campo] = valorDesformateado;
+        if (campo === 'monto') {
+            actualizarTotales();
+        }
+        actualizarCampoOculto('pagos_proveedor_data', pagosProveedorArray);
+    }
+
+    function getObligacionInfo(obligacionId) {
+        const obligacion = obligacionesArray.find(obl => obl.id == obligacionId);
+        if (obligacion) {
+            return `${obligacion.proveedor_nombre} - ${formatearPrecio(obligacion.valor_pagar || 0)}`;
+        }
+        return 'Obligación no encontrada';
+    }
+
+    function actualizarPagoProveedor(index, campo, valor) {
+        pagosProveedorArray[index][campo] = valor;
+        
+        if (campo === 'monto') {
+            actualizarTotales();
+        }
+        
+        if (campo === 'obligacion_id') {
+            renderizarPagosProveedor();
+        }
+        
+        actualizarCampoOculto('pagos_proveedor_data', pagosProveedorArray);
+    }
+
+    // Funciones de utilidad
+    function actualizarCampoOculto(campoId, datos) {
+        const campo = document.getElementById(campoId);
+        if (campo) {
+            campo.value = JSON.stringify(datos);
+        }
+    }
+
+    function actualizarTotales() {
+        const valorClienteInput = document.getElementById('id_valor_cobrar_cliente');
+        let valorCliente = 0;
+        
+        if (valorClienteInput && valorClienteInput.value) {
+            // Si el campo está enfocado (el usuario está editando), usar el valor tal como está
+            if (document.activeElement === valorClienteInput) {
+                // Intentar convertir directamente, manejando tanto números como formato colombiano
+                const valorDirecto = parseFloat(valorClienteInput.value.replace(/[^\d.,]/g, '').replace(',', '.'));
+                valorCliente = isNaN(valorDirecto) ? 0 : valorDirecto;
+            } else {
+                // Si no está enfocado, desformatear si es necesario
+                valorCliente = desformatearPrecio(valorClienteInput.value);
+            }
+        }
+        
+        // Resto de la función permanece igual...
+        const totalObligaciones = obligacionesArray.reduce((sum, obl) => {
+            return sum + (parseFloat(obl.valor_pagar) || 0);
+        }, 0);
+        
+        const totalPagosCliente = pagosClienteArray.reduce((sum, pago) => {
+            return sum + (parseFloat(pago.monto) || 0);
+        }, 0);
+        
+        const totalPagosProveedor = pagosProveedorArray.reduce((sum, pago) => {
+            return sum + (parseFloat(pago.monto) || 0);
+        }, 0);
+        
+        const margenBruto = valorCliente - totalObligaciones;
+        
+        // Actualizar la interfaz con formato colombiano
+        const elementos = {
+            'valor-cliente-display': formatearPrecio(valorCliente),
+            'total-obligaciones': formatearPrecio(totalObligaciones),
+            'total-pagos-cliente': formatearPrecio(totalPagosCliente),
+            'total-pagos-proveedor': formatearPrecio(totalPagosProveedor),
+            'margen-bruto': formatearPrecio(margenBruto)
+        };
+
+        Object.entries(elementos).forEach(([id, valor]) => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.textContent = valor;
+            }
+        });
+        
+        // Cambiar color del margen según si es positivo o negativo
+        const margenElement = document.getElementById('margen-bruto');
+        if (margenElement) {
+            if (margenBruto >= 0) {
+                margenElement.style.color = 'var(--success-color)';
+                margenElement.style.fontWeight = '600';
+            } else {
+                margenElement.style.color = 'var(--danger-color)';
+                margenElement.style.fontWeight = '600';
+            }
+        }
+    }
+
+    // Función MEJORADA para validar antes de enviar
+    document.getElementById('registro-form').addEventListener('submit', function(e) {
+        const valorClienteInput = document.getElementById('id_valor_cobrar_cliente');
+        let valorCliente = 0;
+        
+        if (valorClienteInput && valorClienteInput.value) {
+            // Convertir a número y limpiar el valor para envío
+            valorCliente = desformatearPrecio(valorClienteInput.value);
+            // IMPORTANTE: Enviar como número simple al backend
+            valorClienteInput.value = valorCliente;
+        }
+        
+        // Validar que el total de pagos del cliente no exceda el valor a cobrar
+        const totalPagosCliente = pagosClienteArray.reduce((sum, pago) => {
+            return sum + (parseFloat(pago.monto) || 0);
+        }, 0);
+        
+        if (totalPagosCliente > valorCliente) {
+            e.preventDefault();
+            alert(`Los pagos del cliente (${formatearPrecio(totalPagosCliente)}) no pueden exceder el valor a cobrar (${formatearPrecio(valorCliente)})`);
+            // Restaurar el valor para continuar editando
+            valorClienteInput.value = valorCliente.toString();
+            valorClienteInput.focus();
+            return false;
+        }
+        
+        // Validar que hay al menos una obligación o un pago
+        if (obligacionesArray.length === 0 && pagosClienteArray.length === 0 && pagosProveedorArray.length === 0) {
+            const confirmar = confirm('No hay obligaciones ni pagos registrados. ¿Desea continuar?');
+            if (!confirmar) {
+                e.preventDefault();
+                valorClienteInput.value = valorCliente.toString();
+                return false;
+            }
+        }
+        
+        // Desactivar la alerta de cambios no guardados
+        cambiosRealizados = false;
+        return true;
+    });
+
+    // Variables para control de cambios
+    let cambiosRealizados = false;
+
+    function marcarCambios() {
+        cambiosRealizados = true;
+    }
+
+    // Detectar cambios en los formularios (excluyendo el input de valor cliente para evitar conflictos)
+    document.addEventListener('input', function(e) {
+        if (e.target.id !== 'id_valor_cobrar_cliente') {
+            marcarCambios();
+        }
+    });
+    
+    document.addEventListener('change', function(e) {
+        marcarCambios();
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (cambiosRealizados) {
+            e.preventDefault();
+            e.returnValue = '¿Está seguro de salir? Los cambios no guardados se perderán.';
+            return e.returnValue;
+        }
+    });
+</script>
+{% endblock %}

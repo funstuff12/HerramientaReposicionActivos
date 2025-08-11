@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Tesorería{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+    
+    .main-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .header-section {
+        text-align: center;
+        margin-bottom: 4rem;
+        padding: 2rem 0;
+    }
+    
+    .main-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .main-subtitle {
+        font-size: 1.3rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+    
+    .intro-text {
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+        color: #495057;
+        line-height: 1.6;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .modules-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 3rem;
+        font-size: 1.1rem;
+    }
+    
+    .cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    .main-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        width: 100%;
+        max-width: 800px;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        min-height: 180px;
+    }
+    
+    .main-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .card-left {
+        flex: 1;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .card-right {
+        flex: 0 0 200px;
+        background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        position: relative;
+    }
+    
+    .card-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+    
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .card-description {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .card-features li {
+        padding: 0.3rem 0;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .card-features li:before {
+        content: "✓";
+        color: var(--card-color-1);
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+    
+    .card-action {
+        background: var(--card-color-1);
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        align-self: flex-start;
+        transition: all 0.3s ease;
+    }
+    
+    .card-action:hover {
+        background: var(--card-color-2);
+        transform: scale(1.05);
+    }
+    
+    /* Colores específicos para cada card */
+    .clientes-card {
+        --card-color-1: #2980b9;
+        --card-color-2: #3498db;
+    }
+    
+    .proveedores-card {
+        --card-color-1: #27ae60;
+        --card-color-2: #2ecc71;
+    }
+    
+    .registros-card {
+        --card-color-1: #d68910;
+        --card-color-2: #f39c12;
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-top: 5rem;
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+    
+    .stat-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-description {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        line-height: 1.4;
+    }
+    
+    @media (max-width: 768px) {
+        .main-title {
+            font-size: 2.2rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+        }
+        
+        .main-card {
+            flex-direction: column;
+            max-width: 90%;
+        }
+        
+        .card-right {
+            flex: 0 0 120px;
+            flex-direction: row;
+            padding: 1rem;
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0;
+            margin-right: 1rem;
+        }
+        
+        .card-left {
+            padding: 1.5rem;
+        }
+        
+        .intro-text {
+            padding: 1.5rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="main-container">
+    <div class="container">
+        
+        <!-- Modules Section -->
+        <div class="modules-section">
+            <h2 class="section-title">Módulos del Sistema</h2>
+            <p class="section-subtitle">Explora las herramientas disponibles para gestionar tu tesorería</p>
+            
+            <div class="cards-container">
+                <!-- Card Clientes -->
+                <a href="{% url 'clientes_list' %}" class="main-card clientes-card">
+                    <div class="card-left">
+                        <h3 class="card-title">Gestión de Clientes</h3>
+                        <p class="card-description">
+                            Administra tu cartera de clientes con información detallada sobre términos de pago, 
+                            historial de transacciones y seguimiento de cobros.
+                        </p>
+                        <ul class="card-features">
+                            <li>Registro completo de clientes</li>
+                            <li>Configuración de términos de pago</li>
+                            <li>Seguimiento de estado de cobros</li>
+                            <li>Historial de transacciones</li>
+                        </ul>
+                        <br>
+
+                        <div class="card-action">
+                            <i class="fas fa-arrow-right"></i> Acceder al módulo
+                        </div>
+                    </div>
+                    <div class="card-right">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Card Proveedores -->
+                <a href="{% url 'proveedores_list' %}" class="main-card proveedores-card">
+                    <div class="card-left">
+                        <h3 class="card-title">Gestión de Proveedores</h3>
+                        <p class="card-description">
+                            Controla tus proveedores de materia prima y servicios, con seguimiento de 
+                            términos de pago y gestión de obligaciones pendientes.
+                        </p>
+                        <ul class="card-features">
+                            <li>Base de datos de proveedores</li>
+                            <li>Control de términos de pago</li>
+                            <li>Seguimiento de obligaciones</li>
+                            <li>Gestión de materia prima</li>
+                        </ul>
+                        <br>
+
+                        <div class="card-action">
+                            <i class="fas fa-arrow-right"></i> Acceder al módulo
+                        </div>
+                    </div>
+                    <div class="card-right">
+                        <div class="card-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Card Registros -->
+                <a href="{% url 'registros_list' %}" class="main-card registros-card">
+                    <div class="card-left">
+                        <h3 class="card-title">Registros de Transacciones</h3>
+                        <p class="card-description">
+                            El corazón del sistema: crea, edita y monitorea todas las transacciones 
+                            financieras con cálculo automático de márgenes y flujo de caja.
+                        </p>
+                        <ul class="card-features">
+                            <li>Creación de registros detallados</li>
+                            <li>Cálculo automático de márgenes</li>
+                            <li>Control de pagos y cobros</li>
+                            <li>Seguimiento de flujo de caja</li>
+                        </ul>
+                        <br>
+
+                        <div class="card-action">
+                            <i class="fas fa-arrow-right"></i> Acceder al módulo
+                        </div>
+                    </div>
+                    <div class="card-right">
+                        <div class="card-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+
+</div>
+
+{% endblock %}

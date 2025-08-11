@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar {{ maquina.nombre }}{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --card-border-radius: 8px;
+        --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        --input-bg-color: #f8f9fa;
+        
+        /* Paleta de colores profesionales */
+        --color-cat1: #0d6efd; /* Azul */
+        --color-cat2: #fd7e14; /* Naranja */
+        --color-cat3: #198754; /* Verde */
+        --color-cat4: #6c757d; /* Gris */
+    }
+
+    .form-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .form-page-header h1 { margin: 0; font-size: 2rem; }
+
+    /* Asegurar que las filas se comporten correctamente */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -15px;
+        margin-right: -15px;
+        width: 100%;
+    }
+
+    .col-lg-5 {
+        flex: 0 0 41.66667%;
+        max-width: 41.66667%;
+        padding-left: 15px;
+        padding-right: 15px;
+        display: flex; /* Hacer que la columna sea un flex container */
+        box-sizing: border-box;
+    }
+    
+    .col-offset-1 {
+        margin-left: 8.33333%;
+    }
+
+    .custom-card {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        border-left-width: 5px;
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--card-shadow);
+        /* Usar flex para que las tarjetas ocupen todo el espacio disponible */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    #card-cat1 { border-left-color: var(--color-cat1); }
+    #card-cat2 { border-left-color: var(--color-cat2); }
+    #card-cat3 { border-left-color: var(--color-cat3); }
+    #card-cat4 { border-left-color: var(--color-cat4); }
+
+    .custom-card .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 1.25rem;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        flex-shrink: 0; /* Evitar que el header se comprima */
+    }
+
+    .custom-card .card-body { 
+        padding: 1.5rem 2.5rem; /* Aumentar padding lateral */
+        flex: 1; /* Permitir que el body ocupe el espacio restante */
+    }
+    
+    /* Estilos para inputs con labels visibles */
+    .form-group {
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .form-group input, .form-group select {
+        width: 100%;
+        max-width: 400px; /* Limitar el ancho máximo */
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background-color: var(--input-bg-color);
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        font-size: 0.95rem;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+        outline: 0;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    /* Estilos para errores de validación */
+    .form-group .error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-group input.error, .form-group select.error {
+        border-color: #dc3545;
+    }
+
+    /* Estilos para botones mejorados */
+    .btn-group {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-success {
+        background-color: #198754;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #157347;
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: white;
+    }
+
+    /* Alerta informativa */
+    .info-alert {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 2rem;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .info-alert h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .info-alert p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .info-alert .machine-status {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+    }
+
+    .status-challenger {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-defender {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    /* Separador entre secciones */
+    .section-separator {
+        height: 2rem;
+    }
+
+    /* Estilos para mensajes de Django */
+    .messages {
+        margin-bottom: 1rem;
+    }
+
+    .messages .alert {
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .messages .alert-success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .messages .alert-error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .col-lg-5 {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+        .col-offset-1 {
+            margin-left: 0;
+        }
+        .form-group input, .form-group select {
+            max-width: none; /* En móvil, permitir que ocupen todo el ancho */
+        }
+        .custom-card .card-body {
+            padding: 1.5rem; /* Reducir padding en móvil */
+        }
+    }
+
+    /* Forzar comportamiento en pantallas grandes */
+    @media (min-width: 993px) {
+        .col-lg-5 {
+            flex: 0 0 41.66667% !important;
+            max-width: 41.66667% !important;
+        }
+    }
+</style>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-page-header">
+        <h1>Editar {{ maquina.nombre }}</h1>
+        <div class="btn-group">
+            <a href="{% url 'maquinaria' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+
+    <div class="info-alert">
+        <h4>Editando Máquina</h4>
+        <p>
+            Estás editando la máquina <strong>{{ maquina.nombre }}</strong> - Tipo <strong>{{ maquina.get_tipo_display }}</strong>
+            <span class="machine-status {% if maquina.tipo == 'challenger' %}status-challenger{% else %}status-defender{% endif %}">
+                {{ maquina.get_tipo_display }}
+            </span>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Los cambios se guardarán inmediatamente al hacer clic en "Guardar Cambios".
+        </p>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-5 mb-4 mb-lg-0">
+            <div class="custom-card" id="card-cat1">
+                <div class="card-header">1. Identificación y Estatus</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            {% for error in form.nombre.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.tipo.label_tag }}
+                        {{ form.tipo }}
+                        {% if form.tipo.errors %}
+                            {% for error in form.tipo.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.numero_serie.label_tag }}
+                        {{ form.numero_serie }}
+                        {% if form.numero_serie.errors %}
+                            {% for error in form.numero_serie.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.criticality_ranking.label_tag }}
+                        {{ form.criticality_ranking }}
+                        {% if form.criticality_ranking.errors %}
+                            {% for error in form.criticality_ranking.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.availability.label_tag }}
+                        {{ form.availability }}
+                        {% if form.availability.errors %}
+                            {% for error in form.availability.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.date_in_service.label_tag }}
+                        {{ form.date_in_service }}
+                        {% if form.date_in_service.errors %}
+                            {% for error in form.date_in_service.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-offset-1">
+            <div class="custom-card" id="card-cat2">
+                <div class="card-header">2. Costos de Adquisición y Valor</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form.purchase_price.label_tag }}
+                        {{ form.purchase_price }}
+                        {% if form.purchase_price.errors %}
+                            {% for error in form.purchase_price.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.installation_and_training_cost.label_tag }}
+                        {{ form.installation_and_training_cost }}
+                        {% if form.installation_and_training_cost.errors %}
+                            {% for error in form.installation_and_training_cost.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.setup_costs.label_tag }}
+                        {{ form.setup_costs }}
+                        {% if form.setup_costs.errors %}
+                            {% for error in form.setup_costs.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.current_resale_value.label_tag }}
+                        {{ form.current_resale_value }}
+                        {% if form.current_resale_value.errors %}
+                            {% for error in form.current_resale_value.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.salvage_value.label_tag }}
+                        {{ form.salvage_value }}
+                        {% if form.salvage_value.errors %}
+                            {% for error in form.salvage_value.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-separator"></div>
+
+    <div class="row">
+        <div class="col-lg-5 mb-4 mb-lg-0">
+            <div class="custom-card" id="card-cat3">
+                <div class="card-header">3. Costos Operativos y Mantenimiento</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form.initial_monthly_maintenance_cost.label_tag }}
+                        {{ form.initial_monthly_maintenance_cost }}
+                        {% if form.initial_monthly_maintenance_cost.errors %}
+                            {% for error in form.initial_monthly_maintenance_cost.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.maintenance_cost_gradient.label_tag }}
+                        {{ form.maintenance_cost_gradient }}
+                        {% if form.maintenance_cost_gradient.errors %}
+                            {% for error in form.maintenance_cost_gradient.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.cost_of_downtime.label_tag }}
+                        {{ form.cost_of_downtime }}
+                        {% if form.cost_of_downtime.errors %}
+                            {% for error in form.cost_of_downtime.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.operator_labor_cost.label_tag }}
+                        {{ form.operator_labor_cost }}
+                        {% if form.operator_labor_cost.errors %}
+                            {% for error in form.operator_labor_cost.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.energy_consumption.label_tag }}
+                        {{ form.energy_consumption }}
+                        {% if form.energy_consumption.errors %}
+                            {% for error in form.energy_consumption.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.energy_cost.label_tag }}
+                        {{ form.energy_cost }}
+                        {% if form.energy_cost.errors %}
+                            {% for error in form.energy_cost.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.consumable_replacement_cost_1.label_tag }}
+                        {{ form.consumable_replacement_cost_1 }}
+                        {% if form.consumable_replacement_cost_1.errors %}
+                            {% for error in form.consumable_replacement_cost_1.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.consumable_lifespan_1.label_tag }}
+                        {{ form.consumable_lifespan_1 }}
+                        {% if form.consumable_lifespan_1.errors %}
+                            {% for error in form.consumable_lifespan_1.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-offset-1">
+            <div class="custom-card" id="card-cat4">
+                <div class="card-header">4. Producción y Vida Útil</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form.useful_life.label_tag }}
+                        {{ form.useful_life }}
+                        {% if form.useful_life.errors %}
+                            {% for error in form.useful_life.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.end_of_useful_life_date.label_tag }}
+                        {{ form.end_of_useful_life_date }}
+                        {% if form.end_of_useful_life_date.errors %}
+                            {% for error in form.end_of_useful_life_date.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.monthly_depreciation.label_tag }}
+                        {{ form.monthly_depreciation }}
+                        {% if form.monthly_depreciation.errors %}
+                            {% for error in form.monthly_depreciation.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.production_rate.label_tag }}
+                        {{ form.production_rate }}
+                        {% if form.production_rate.errors %}
+                            {% for error in form.production_rate.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.production_rate_units.label_tag }}
+                        {{ form.production_rate_units }}
+                        {% if form.production_rate_units.errors %}
+                            {% for error in form.production_rate_units.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.texas_workdays.label_tag }}
+                        {{ form.texas_workdays }}
+                        {% if form.texas_workdays.errors %}
+                            {% for error in form.texas_workdays.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.monthly_operating_hours.label_tag }}
+                        {{ form.monthly_operating_hours }}
+                        {% if form.monthly_operating_hours.errors %}
+                            {% for error in form.monthly_operating_hours.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

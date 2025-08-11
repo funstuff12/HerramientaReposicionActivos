@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block title %}Cuentas por Pagar{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas por Pagar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Tu CSS existente va aquí (sin cambios) */
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --border-radius: 8px;
+        }
+        /* ... el resto de tu CSS ... */
+        body { font-family: 'Inter', sans-serif; background-color: var(--gray-50); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+            .page-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 2rem; 
+    }
+    
+    .page-header h1 { 
+        font-size: 2.2rem; 
+        margin: 0;
+    }
+    
+    .header-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+        .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); text-decoration: none; font-weight: 500; transition: all 0.2s ease; border: 1px solid transparent; cursor: pointer; }
+        .btn-primary { background: var(--primary-color); color: var(--white); }
+        .btn-primary:hover { background: #1d4ed8; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); border-radius: var(--border-radius); padding: 1.5rem; border: 1px solid var(--gray-200); }
+        .stat-title { font-size: 0.875rem; color: var(--gray-500); text-transform: uppercase; }
+        .stat-value { font-size: 1.875rem; font-weight: 700; }
+        .filters { background: var(--white); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 2rem; }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-label { font-weight: 500; color: var(--gray-700); }
+        .form-input, .form-select { padding: 0.75rem; border: 1px solid var(--gray-300); border-radius: var(--border-radius); }
+        .table-container { background: var(--white); border-radius: var(--border-radius); overflow: hidden; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: var(--gray-50); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--gray-100); }
+        .status-badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .status-current { background: #d1fae5; color: #065f46; }
+        .status-overdue { background: #fee2e2; color: #991b1b; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+        .amount-negative { color: var(--danger-color); font-weight: 600; }
+        .amount-neutral { color: var(--gray-500); }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--gray-500); }
+        .loading { display: flex; justify-content: center; align-items: center; padding: 3rem; color: var(--gray-500); }
+        .loading-spinner { width: 2rem; height: 2rem; border: 3px solid var(--gray-200); border-top: 3px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.75rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Cuentas Por Pagar</h1>
+            <div class="header-buttons">
+                <a href="{% url 'registros_crear' %}" class="btn btn-primary">Crear Registro</a>
+                <a href="{% url 'index' %}" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-title">Total por Pagar</span></div>
+                <div class="stat-value" id="totalOriginal">$0</div>
+                <div class="stat-subtitle">Monto original total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-title">Saldo Pendiente</span></div>
+                <div class="stat-value" id="totalPending">$0</div>
+                <div class="stat-subtitle">Por pagar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-title">Total Pagado</span></div>
+                <div class="stat-value" id="totalPaid">$0</div>
+                <div class="stat-subtitle">Completado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-title">Vencidas</span></div>
+                <div class="stat-value" id="totalOverdue">$0</div>
+                <div class="stat-subtitle">En mora</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label class="form-label" for="vendorFilter">Proveedor</label>
+                    <select class="form-select" id="vendorFilter">
+                        <option value="">Todos los proveedores</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="statusFilter">Estado</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos los estados</option>
+                        <option value="current">Al día</option>
+                        <option value="overdue">Vencidas</option>
+                        <option value="0-30">Vencidas 1-30 días</option>
+                        <option value="31-60">Vencidas 31-60 días</option>
+                        <option value="61-90">Vencidas 61-90 días</option>
+                        <option value="91+">Vencidas +91 días</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="minAmountFilter">Saldo Mínimo</label>
+                    <input type="number" class="form-input" id="minAmountFilter" placeholder="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header" style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                <h3>Obligaciones Pendientes</h3>
+                <div class="table-meta" style="font-size: 0.875rem; color: #64748b;">
+                    <span id="tableCount">0 registros</span> • 
+                    Actualizado: <span id="lastUpdate"></span>
+                </div>
+            </div>
+            <div class="table-wrapper" style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Proveedor</th>
+                            <th>Documento</th>
+                            <th>Fecha Inicio (Día 0)</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Días Venc.</th>
+                            <th>Valor Original</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Pagos (0-30d)</th>
+                            <th>Pagos (31-60d)</th>
+                            <th>Pagos (61-90d)</th>
+                            <th>Pagos (91-120d)</th>
+                            <th>Pagos (+120d)</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let allData = [];
+            let filteredData = [];
+
+            const formatCurrency = (amount) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
+            const formatDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('es-CO') : 'N/A';
+            
+
+            const getStatusBadge = (item) => {
+                if (!item.isOverdue) {
+                    return '<span class="status-badge status-current"><i class="fas fa-check-circle"></i> Al día</span>';
+                }
+                if (item.overdueDays <= 30) {
+                    return `<span class="status-badge status-warning"><i class="fas fa-exclamation-triangle"></i> ${item.overdueDays} días</span>`;
+                }
+                return `<span class="status-badge status-overdue"><i class="fas fa-clock"></i> ${item.overdueDays} días</span>`;
+            };
+
+            const updateStats = (data) => {
+                const stats = data.reduce((acc, item) => {
+                    acc.totalOriginal += item.originalAmount;
+                    acc.totalPending += item.netBalance;
+                    acc.totalPaid += item.paidAmount;
+                    if (item.isOverdue) {
+                        acc.totalOverdue += item.netBalance;
+                    }
+                    return acc;
+                }, { totalOriginal: 0, totalPending: 0, totalPaid: 0, totalOverdue: 0 });
+
+                document.getElementById('totalOriginal').textContent = formatCurrency(stats.totalOriginal);
+                document.getElementById('totalPending').textContent = formatCurrency(stats.totalPending);
+                document.getElementById('totalPaid').textContent = formatCurrency(stats.totalPaid);
+                document.getElementById('totalOverdue').textContent = formatCurrency(stats.totalOverdue);
+            };
+
+            const renderTable = (data) => {
+                const tbody = document.getElementById('tableBody');
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="14" class="empty-state">No hay registros.</td></tr>`;
+                    document.getElementById('tableCount').textContent = '0 registros';
+                    return;
+                }
+
+                // PLANTILLA DE FILA CORREGIDA
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${/* getStatusBadge(item) */ item.isOverdue ? `<span class="status-badge status-overdue">${item.overdueDays} días venc.</span>` : `<span class="status-badge status-current">Al día</span>`}</td>
+                        <td>${item.vendorName}</td>
+                        <td>${item.documentNumber}</td>
+                        <td>${formatDate(item.postingDate)}</td>
+                        <td>${formatDate(item.netDueDate)}</td>
+                        <td><span class="${item.isOverdue ? 'amount-negative' : ''}">${item.overdueDays}</span></td>
+                        <td class="amount-neutral">${formatCurrency(item.originalAmount)}</td>
+                        <td class="amount-negative">${formatCurrency(item.netBalance)}</td>
+                        
+                        <td class="amount-positive">${formatCurrency(item.pagos_0_30)}</td>
+                        <td class="amount-positive">${formatCurrency(item.pagos_31_60)}</td>
+                        <td class="amount-positive">${formatCurrency(item.pagos_61_90)}</td>
+                        <td class="amount-positive">${formatCurrency(item.pagos_91_120)}</td>
+                        <td class="amount-positive">${formatCurrency(item.pagos_120_plus)}</td>
+
+                        <td>${item.description}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('tableCount').textContent = `${data.length} registro${data.length !== 1 ? 's' : ''}`;
+            };
+            
+            const populateFilters = (data) => {
+                const vendorFilter = document.getElementById('vendorFilter');
+                const vendors = [...new Set(data.map(item => item.vendorName))].sort();
+                vendorFilter.innerHTML += vendors.map(v => `<option value="${v}">${v}</option>`).join('');
+            };
+
+            const applyFilters = () => {
+                const vendor = document.getElementById('vendorFilter').value;
+                const status = document.getElementById('statusFilter').value;
+                const minAmount = parseFloat(document.getElementById('minAmountFilter').value) || 0;
+
+                filteredData = allData.filter(item => {
+                    if (vendor && item.vendorName !== vendor) return false;
+                    if (minAmount && item.netBalance < minAmount) return false;
+
+                    if (status) {
+                        if (status === 'current' && item.isOverdue) return false;
+                        if (status === 'overdue' && !item.isOverdue) return false;
+                        if (status === '0-30' && (item.overdueDays < 1 || item.overdueDays > 30)) return false;
+                        if (status === '31-60' && (item.overdueDays < 31 || item.overdueDays > 60)) return false;
+                        if (status === '61-90' && (item.overdueDays < 61 || item.overdueDays > 90)) return false;
+                        if (status === '91+' && item.overdueDays < 91) return false;
+                    }
+                    return true;
+                });
+                
+                renderTable(filteredData);
+                updateStats(filteredData);
+            };
+
+            const loadData = async () => {
+                try {
+                    const response = await fetch("{% url 'api_cuentas_por_pagar' %}");
+                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) throw new Error(data.message || 'El servidor devolvió un error.');
+
+                    allData = data.cxp_data;
+                    document.getElementById('lastUpdate').textContent = new Date(data.fecha_reporte).toLocaleString('es-CO');
+                    
+                    populateFilters(allData);
+                    applyFilters(); // Esto renderizará la tabla y las estadísticas iniciales
+
+                } catch (error) {
+                    console.error('Error al cargar los datos:', error);
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="15" class="empty-state">❌ Error al cargar los datos. Por favor, revisa la consola para más detalles.</td></tr>`;
+                }
+            };
+            
+            // Carga inicial de datos
+            loadData();
+
+            // Asignar eventos a los filtros
+            document.getElementById('vendorFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('minAmountFilter').addEventListener('input', applyFilters);
+
+            // Hacer que la función de exportar sea global
+            window.exportData = () => {
+                if (filteredData.length === 0) {
+                    alert('No hay datos para exportar.');
+                    return;
+                }
+                const headers = "Estado,Proveedor,Documento,Fecha Creación,Fecha Vencimiento,Días Mora,Valor Original,Saldo Pendiente,Al Día,1-30d,31-60d,61-90d,91-120d,+120d,Descripción";
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + headers + "\n"
+                    + filteredData.map(item => [
+                        item.isOverdue ? 'Vencida' : 'Al día',
+                        `"${item.vendorName}"`,
+                        item.documentNumber,
+                        formatDate(item.postingDate),
+                        formatDate(item.netDueDate),
+                        item.overdueDays,
+                        item.originalAmount,
+                        item.netBalance,
+                        item.notDue,
+                        item.days0_30,
+                        item.days31_60,
+                        item.days61_90,
+                        item.days91_120,
+                        item.days120Plus,
+                        `"${item.description || ''}"`
+                    ].join(",")).join("\n");
+
+                const link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", `cuentas_por_pagar_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+        });
+    </script>
+</body>
+{% endblock %}
