@@ -11,7 +11,7 @@ SECRET_KEY = 'django-insecure-k31fa5wajk7n(6%s1x!a)y+zm-s@$6nfds4=)yi=f1k%g3z!kx
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['https://herramientareposicionactivos.onrender.com',
+ALLOWED_HOSTS = ['herramientareposicionactivos.onrender.com',
                  '127.0.0.1',]
 
 # Application definition
@@ -89,6 +89,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 
