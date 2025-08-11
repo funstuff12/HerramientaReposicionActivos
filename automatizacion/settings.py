@@ -56,7 +56,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'app:app'
+WSGI_APPLICATION = 'automatizacion.wsgi:application'
 
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
@@ -89,5 +89,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
